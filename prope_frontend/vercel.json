@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/graphql",
+      "destination": "https://acrewise-9zrp.onrender.com/graphql"
+    },
+    {
+      "source": "/api/nim/:path*",
+      "destination": "https://integrate.api.nvidia.com/v1/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://acrewise-9zrp.onrender.com/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+Sandbox Test Cards
+Use the following test cards for sandbox transactions. Click any detail to copy it.
+
+Card Without OTP
+
+4111 1111 1111 1111
+VALID THRU
+10/2027
+CVV
+123
+PIN:
+1234
+
+Card With OTP
+
+5060 9959 9424 7093
+VALID THRU
+12/2027
+CVV
+123
+PIN:
+1234
+OTP:
+123456
+
+Card With 3DS
+
+4000 0000 0000 0002
+VALID THRU
+12/2027
+CVV
+123
+PIN:
+1234
+OTP:
+123456
+
+Failed Card
+
+4111 1111 1111 1110
+VALID THRU
+10/2027
+CVV
+123
