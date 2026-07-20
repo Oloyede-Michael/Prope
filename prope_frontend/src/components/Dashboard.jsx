@@ -442,9 +442,7 @@ export default function Dashboard({ userEmail, onSignOut }) {
       rawProps = rawProps.filter(p => 
         !p.id.startsWith('a0000000') &&
         p.price && p.price > 0 &&
-        !p.title.toLowerCase().includes('unit 3b') &&
-        !p.title.toLowerCase().includes('hostel') &&
-        !p.title.toLowerCase().includes('bungallow')
+        !p.title.toLowerCase().includes('unit 3b')
       );
       if (currentProfile.role === 'LANDLORD') {
         rawProps = rawProps.filter(p => p.landlord?.email === currentProfile.email);
