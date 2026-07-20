@@ -38,10 +38,10 @@ function enrichProperty(dbProp) {
   return {
     ...dbProp,
     price: parseFloat(dbProp.price || 0),
-    beds: 4,
-    baths: 4,
-    sqft: 4500,
-    yearBuilt: 2023,
+    beds: dbProp.beds || 4,
+    baths: dbProp.baths || 4,
+    sqft: dbProp.size || 4500,
+    yearBuilt: dbProp.built || 2023,
     tag: dbProp.type === 'RENT' ? 'Featured Rent' : 'Exclusive Sale',
     images: [
       dbProp.imageUrl || '/dashboard_preview.jpg',
@@ -57,10 +57,10 @@ function enrichProperty(dbProp) {
       eco: ["Solar Microgrid Integration"]
     },
     agent: {
-      name: "Marcus Sterling",
-      role: "Managing Partner",
-      phone: "+234 815 555 9010",
-      email: "m.sterling@prope-luxury.com",
+      name: dbProp.caretakerName || (dbProp.landlord && dbProp.landlord.name) || "Marcus Sterling",
+      role: dbProp.caretakerName ? "Property Caretaker" : "Managing Partner",
+      phone: dbProp.caretakerPhone || (dbProp.landlord && dbProp.landlord.phone) || "+234 815 555 9010",
+      email: dbProp.caretakerEmail || (dbProp.landlord && dbProp.landlord.email) || "m.sterling@prope-luxury.com",
       avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=256&h=256&q=80"
     },
     firstPaymentAmount: parseFloat(dbProp.firstPaymentAmount || dbProp.price),
@@ -430,7 +430,9 @@ export default function Dashboard({ userEmail, onSignOut }) {
             caretakerEmail
             caretakerPhone
             landlord {
+              name
               email
+              phone
             }
           }
         }
@@ -2744,8 +2746,7 @@ export default function Dashboard({ userEmail, onSignOut }) {
 
       {/* 3. PROPERTY DETAIL OVERLAY MODAL */}
       {selectedProperty && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 bg-stone-900/50 backdrop-blur-sm overflow-y-auto">
-          
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-sm p-4 md:p-6 flex justify-center items-start">
           <div className="w-full max-w-5xl rounded-3xl border border-[#E5E0D5]/80 shadow-2xl overflow-hidden my-8 animate-in zoom-in-95 duration-200 relative bg-[#FAF8F5] text-stone-850">
             
             {/* Header / Dismiss Button */}
@@ -3139,7 +3140,7 @@ export default function Dashboard({ userEmail, onSignOut }) {
                   <div className="space-y-6 animate-in fade-in duration-200">
                     <div className="text-left space-y-1">
                       <h4 className="text-xs font-bold font-serif uppercase tracking-wider text-stone-600">Request Private Tour Appointment</h4>
-                      <p className="text-[10px] text-stone-500">Pick a secure date and hour for a physical showing guided by our Managing Partner.</p>
+                      <p className="text-[10px] text-stone-500">Pick a secure date and hour for a physical showing guided by {selectedProperty.agent.name} ({selectedProperty.agent.role}).</p>
                     </div>
 
                     {tourScheduled ? (
@@ -3147,7 +3148,7 @@ export default function Dashboard({ userEmail, onSignOut }) {
                         <ShieldCheck className="w-10 h-10 mx-auto text-[#C5A059]" />
                         <h5 className="text-sm font-bold uppercase tracking-wider font-serif">Viewing Appointment Pending</h5>
                         <p className="text-xs max-w-md mx-auto leading-relaxed text-stone-650">
-                          Your tour request for <strong>{selectedTourDate}</strong> at <strong>{selectedTourTime}</strong> has been registered with Marcus Sterling's calendar. Confirming via Monnify SMS.
+                          Your tour request for <strong>{selectedTourDate}</strong> at <strong>{selectedTourTime}</strong> has been registered with {selectedProperty.agent.name}'s calendar. Confirming via Monnify SMS.
                         </p>
                       </div>
                     ) : (
@@ -3230,6 +3231,18 @@ export default function Dashboard({ userEmail, onSignOut }) {
                           const result = [];
                           let currentSection = null;
                           let currentParagraphs = [];
+
+                          const formatInlineMarkdown = (textStr) => {
+                            if (!textStr) return '';
+                            // Split by '**' to alternate between regular text and bold text
+                            const parts = String(textStr).split('**');
+                            return parts.map((part, idx) => {
+                              if (idx % 2 === 1) {
+                                return <strong key={idx} className="font-extrabold text-stone-900">{part}</strong>;
+                              }
+                              return part;
+                            });
+                          };
 
                           const flushParagraphs = () => {
                             if (currentParagraphs.length > 0 && currentSection) {
@@ -3329,7 +3342,7 @@ export default function Dashboard({ userEmail, onSignOut }) {
                                     {dataRows.map((row, rIdx) => (
                                       <tr key={rIdx} className="hover:bg-white/40 transition-colors">
                                         {row.map((cell, cIdx) => (
-                                          <td key={cIdx} className="p-3 whitespace-pre-wrap">{cell}</td>
+                                          <td key={cIdx} className="p-3 whitespace-pre-wrap">{formatInlineMarkdown(cell)}</td>
                                         ))}
                                       </tr>
                                     ))}
@@ -3349,20 +3362,20 @@ export default function Dashboard({ userEmail, onSignOut }) {
                                   if (el.type === 'list-item') return (
                                     <div key={elIdx} className="flex items-start gap-2 text-xs text-stone-700 my-1.5 pl-2 text-left">
                                       <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059] mt-1.5 shrink-0" />
-                                      <span className="leading-relaxed">{el.text}</span>
+                                      <span className="leading-relaxed">{formatInlineMarkdown(el.text)}</span>
                                     </div>
                                   );
                                   if (el.type === 'subheading') return (
-                                    <h6 key={elIdx} className="text-[11px] font-bold font-mono text-[#B8934C] uppercase tracking-wider mt-4 mb-2 text-left">{el.text}</h6>
+                                    <h6 key={elIdx} className="text-[11px] font-bold font-mono text-[#B8934C] uppercase tracking-wider mt-4 mb-2 text-left">{formatInlineMarkdown(el.text)}</h6>
                                   );
                                   if (el.type === 'definition') return (
                                     <div key={elIdx} className="my-2 p-3.5 bg-[#FAF8F5]/60 border border-[#E5E0D5]/50 rounded-2xl text-left">
-                                      <span className="font-bold text-stone-850 text-xs block">{el.term}</span>
-                                      <span className="text-xs text-stone-600 leading-relaxed block mt-1">{el.definition}</span>
+                                      <span className="font-bold text-stone-850 text-xs block">{formatInlineMarkdown(el.term)}</span>
+                                      <span className="text-xs text-stone-600 leading-relaxed block mt-1">{formatInlineMarkdown(el.definition)}</span>
                                     </div>
                                   );
                                   return (
-                                    <p key={elIdx} className="text-xs text-stone-700 leading-relaxed my-2 text-left whitespace-pre-wrap">{el.text}</p>
+                                    <p key={elIdx} className="text-xs text-stone-700 leading-relaxed my-2 text-left whitespace-pre-wrap">{formatInlineMarkdown(el.text)}</p>
                                   );
                                 })}
                               </div>
