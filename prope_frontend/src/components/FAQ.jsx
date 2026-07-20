@@ -21,13 +21,13 @@ export default function FAQ() {
   ];
 
   return (
-    <section id="faq" className="py-24 px-6 md:px-16 lg:px-24 bg-slate-900 border-t border-slate-950 text-slate-100 relative">
-      <div className="absolute top-1/2 left-1/4 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
+    <section id="faq" className="py-24 px-6 md:px-16 lg:px-24 bg-[#FAF8F5] border-t border-[#E5E0D5]/80 text-stone-800 relative">
+      <div className="absolute top-1/2 left-1/4 w-[400px] h-[400px] bg-[#C5A059]/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mx-auto max-w-2xl space-y-4">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-400">Frequently asked questions</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-100 leading-tight">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#B8934C]">Frequently asked questions</p>
+          <h2 className="text-3xl md:text-4xl font-serif font-extrabold text-stone-900 leading-tight">
             Answers for property managers and tenants.
           </h2>
         </div>
@@ -36,10 +36,10 @@ export default function FAQ() {
           {faqs.map(({ q, a }) => (
             <div 
               key={q} 
-              className="rounded-2xl border border-slate-800 bg-slate-950/30 p-8 shadow-md hover:border-slate-700/60 transition-all duration-300 text-left"
+              className="rounded-3xl border border-white bg-white/60 p-8 shadow-sm hover:border-[#C5A059]/40 hover:bg-white transition-all duration-300 text-left"
             >
-              <h3 className="text-base font-bold text-slate-200">{q}</h3>
-              <p className="mt-3 text-xs text-slate-400 leading-relaxed">{a}</p>
+              <h3 className="text-base font-bold font-serif text-stone-850">{q}</h3>
+              <p className="mt-3 text-xs text-stone-600 leading-relaxed">{a}</p>
             </div>
           ))}
         </div>

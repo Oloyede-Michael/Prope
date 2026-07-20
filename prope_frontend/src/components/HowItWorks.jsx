@@ -24,16 +24,16 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section id="how-it-works" className="relative py-24 px-6 md:px-16 lg:px-24 bg-slate-900 border-y border-slate-950 text-slate-100">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
+    <section id="how-it-works" className="relative py-24 px-6 md:px-16 lg:px-24 bg-[#FAF8F5] border-y border-[#E5E0D5]/80 text-stone-800">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#C5A059]/5 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mx-auto max-w-2xl space-y-4">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-400">How it works</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-100 leading-tight">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#B8934C]">How it works</p>
+          <h2 className="text-3xl md:text-4xl font-bold font-serif text-stone-900 leading-tight">
             From onboarding to settlement in three automated steps.
           </h2>
-          <p className="text-sm text-slate-400 leading-relaxed">
+          <p className="text-sm text-stone-600 leading-relaxed">
             Prope abstracts the complexities of transaction lifecycle, banking validations, and ledger adjustments so you can focus on scale.
           </p>
         </div>
@@ -42,20 +42,20 @@ export default function HowItWorks() {
           {steps.map(({ num, icon: Icon, title, desc }) => (
             <div 
               key={num} 
-              className="group relative rounded-2xl border border-slate-800 bg-slate-950/40 p-8 shadow-xl backdrop-blur-sm hover:border-indigo-500/30 hover:bg-slate-950/60 transition-all duration-300 flex flex-col justify-between"
+              className="group relative rounded-3xl border border-white bg-white/60 p-8 shadow-md backdrop-blur-sm hover:border-[#C5A059]/40 hover:bg-white transition-all duration-300 flex flex-col justify-between"
             >
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                  <div className="w-10 h-10 rounded-xl bg-[#C5A059]/10 border border-[#C5A059]/20 flex items-center justify-center text-[#B8934C]">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className="text-xs font-mono font-bold text-slate-700 tracking-wider group-hover:text-indigo-500/50 transition-colors">
+                  <span className="text-xs font-mono font-bold text-stone-400 tracking-wider group-hover:text-[#B8934C] transition-colors">
                     STEP {num}
                   </span>
                 </div>
                 <div className="space-y-2 text-left">
-                  <h3 className="text-lg font-bold text-slate-200">{title}</h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">{desc}</p>
+                  <h3 className="text-lg font-bold font-serif text-stone-850">{title}</h3>
+                  <p className="text-xs text-stone-600 leading-relaxed">{desc}</p>
                 </div>
               </div>
             </div>

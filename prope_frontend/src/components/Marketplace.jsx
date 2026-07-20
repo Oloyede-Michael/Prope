@@ -9,7 +9,7 @@ import { LUXURY_PROPERTIES } from '../data/luxuryProperties.js';
 
 export default function Marketplace({ userProfile, onRent, onBuy, onClose }) {
   // --- STATE ---
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
   const [viewMode, setViewMode] = useState('split'); // 'grid', 'list', 'split'
   const [currency, setCurrency] = useState('NGN'); // 'NGN', 'USD', 'EUR'
   

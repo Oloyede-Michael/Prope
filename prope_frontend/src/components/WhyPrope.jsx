@@ -26,16 +26,16 @@ export default function WhyPrope() {
   ];
 
   return (
-    <section id="why-prope" className="py-24 px-6 md:px-16 lg:px-24 bg-slate-950 text-slate-100 relative">
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-650/5 rounded-full blur-[120px] pointer-events-none" />
+    <section id="why-prope" className="py-24 px-6 md:px-16 lg:px-24 bg-[#FAF8F5] text-stone-800 relative">
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#C5A059]/5 rounded-full blur-[120px] pointer-events-none" />
       
       <div className="max-w-7xl mx-auto grid gap-12 lg:grid-cols-[0.9fr_1.1fr] items-center relative z-10">
         <div className="space-y-6 text-left">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-400">Why Prope</p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-100 leading-tight">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#B8934C]">Why Prope</p>
+          <h2 className="text-3xl md:text-4xl font-serif font-extrabold text-stone-900 leading-tight">
             Designed for modern landlords and property operators.
           </h2>
-          <p className="text-sm text-slate-400 leading-relaxed">
+          <p className="text-sm text-stone-600 leading-relaxed">
             We replace scattered invoices, offline banking transfers, and spreadsheet calculations with a unified platform for payment routing and property reconciliation.
           </p>
         </div>
@@ -44,14 +44,14 @@ export default function WhyPrope() {
           {points.map(({ icon: Icon, title, desc }) => (
             <div 
               key={title} 
-              className="rounded-2xl border border-slate-900 bg-slate-900/30 p-6 hover:border-slate-800 hover:bg-slate-900/50 transition-all duration-300 shadow-md flex flex-col items-start gap-4 text-left"
+              className="rounded-3xl border border-white bg-white/60 p-6 hover:border-[#C5A059]/40 hover:bg-white transition-all duration-300 shadow-sm flex flex-col items-start gap-4 text-left"
             >
-              <div className="w-9 h-9 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+              <div className="w-9 h-9 rounded-xl bg-[#C5A059]/10 flex items-center justify-center text-[#B8934C]">
                 <Icon className="w-4 h-4" />
               </div>
               <div className="space-y-1.5">
-                <h3 className="text-sm font-bold text-slate-200">{title}</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">{desc}</p>
+                <h3 className="text-sm font-bold font-serif text-stone-850">{title}</h3>
+                <p className="text-xs text-stone-600 leading-relaxed">{desc}</p>
               </div>
             </div>
           ))}

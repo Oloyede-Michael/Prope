@@ -3195,7 +3195,7 @@ export default function Dashboard({ userEmail, onSignOut }) {
                           onClick={handleScheduleTour}
                           className="w-full py-3 bg-[#C5A059] hover:bg-[#C5A059]/90 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition duration-300 shadow-sm cursor-pointer"
                         >
-                          Confirm Showing Reservation
+                            Confirm Showing Reservation
                         </button>
                       </div>
                     )}
@@ -3219,38 +3219,153 @@ export default function Dashboard({ userEmail, onSignOut }) {
                         </div>
                       </div>
                     ) : neighborhoodReports[selectedProperty.id] ? (
-                      <div className="grid gap-4 sm:grid-cols-2 text-left">
+                      <div className="space-y-6 w-full text-left">
                         {(() => {
                           const text = neighborhoodReports[selectedProperty.id];
-                          const lines = text.split('\n');
+                          // Clean headers first
+                          const cleanText = text.replace(/##\s*(\d+\.\s+[^:\n]+)/g, '$1')
+                                                .replace(/\*\*(\d+\.\s+[^:\n]+)\*\*/g, '$1');
+                          
+                          const lines = cleanText.split('\n');
                           const result = [];
                           let currentSection = null;
+                          let currentParagraphs = [];
+
+                          const flushParagraphs = () => {
+                            if (currentParagraphs.length > 0 && currentSection) {
+                              const parsedElements = [];
+                              let inTable = false;
+                              let tableRows = [];
+
+                              for (let i = 0; i < currentParagraphs.length; i++) {
+                                const line = currentParagraphs[i].trim();
+                                if (line.startsWith('|')) {
+                                  inTable = true;
+                                  tableRows.push(line);
+                                } else {
+                                  if (inTable && tableRows.length > 0) {
+                                    parsedElements.push({ type: 'table', rows: [...tableRows] });
+                                    tableRows = [];
+                                    inTable = false;
+                                  }
+                                  
+                                  const cleanedLine = line.replace(/^---\s*$/, '').trim();
+                                  if (!cleanedLine) continue;
+
+                                  if (cleanedLine.startsWith('-') || cleanedLine.startsWith('*')) {
+                                    parsedElements.push({ type: 'list-item', text: cleanedLine.replace(/^[-*]\s*/, '') });
+                                  } else if (cleanedLine.startsWith('**') && cleanedLine.endsWith('**') && cleanedLine.length > 4) {
+                                    parsedElements.push({ type: 'subheading', text: cleanedLine.replace(/\*\*/g, '') });
+                                  } else {
+                                    const subMatch = cleanedLine.match(/^\*\*([^*]+)\*\*:(.*)$/);
+                                    if (subMatch) {
+                                      parsedElements.push({ type: 'definition', term: subMatch[1].trim(), definition: subMatch[2].trim() });
+                                    } else {
+                                      parsedElements.push({ type: 'text', text: cleanedLine });
+                                    }
+                                  }
+                                }
+                              }
+                              if (inTable && tableRows.length > 0) {
+                                parsedElements.push({ type: 'table', rows: tableRows });
+                              }
+                              currentSection.elements.push(...parsedElements);
+                              currentParagraphs = [];
+                            }
+                          };
 
                           lines.forEach(line => {
-                            const match = line.match(/^\d+\.\s+([A-Z\s&]+):?/);
+                            const trimmed = line.trim();
+                            const match = trimmed.match(/^(\d+\.\s+[A-Z\s&]+)/) || trimmed.match(/^##\s*(\d+\.\s+[^:\n]+)/);
                             if (match) {
-                              if (currentSection) result.push(currentSection);
-                              currentSection = {
-                                title: match[1].trim(),
-                                content: []
-                              };
-                            } else if (currentSection) {
-                              const cleanedLine = line.replace(/^-\s*/, '').trim();
-                              if (cleanedLine) {
-                                currentSection.content.push(cleanedLine);
+                              flushParagraphs();
+                              if (currentSection) {
+                                result.push(currentSection);
                               }
+                              currentSection = {
+                                title: match[1].replace(/^\d+\.\s+/, '').trim(),
+                                elements: []
+                              };
+                            } else {
+                              currentParagraphs.push(line);
                             }
                           });
-                          if (currentSection) result.push(currentSection);
-                          
-                          if (result.length === 0) {
-                            result.push({ title: "Comprehensive Analysis", content: [text] });
+                          flushParagraphs();
+                          if (currentSection) {
+                            result.push(currentSection);
                           }
 
+                          if (result.length === 0) {
+                            result.push({
+                              title: "Intelligence Overview",
+                              elements: [{ type: 'text', text }]
+                            });
+                          }
+
+                          const renderTable = (rows) => {
+                            const cleanRows = rows.filter(r => !r.includes('---'));
+                            if (cleanRows.length === 0) return null;
+
+                            const parseCells = (rowStr) => {
+                              return rowStr.split('|')
+                                .map(cell => cell.trim())
+                                .filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+                            };
+
+                            const headers = parseCells(cleanRows[0]);
+                            const dataRows = cleanRows.slice(1).map(parseCells);
+
+                            return (
+                              <div className="w-full overflow-x-auto my-4 border border-[#E5E0D5]/80 rounded-2xl bg-[#FAF8F5]/50 shadow-2xs">
+                                <table className="w-full text-left text-xs border-collapse">
+                                  <thead>
+                                    <tr className="bg-[#C5A059]/10 border-b border-[#E5E0D5]/80">
+                                      {headers.map((h, i) => (
+                                        <th key={i} className="p-3 font-mono font-bold text-[#B8934C] uppercase tracking-wider text-[10px]">{h}</th>
+                                      ))}
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-[#E5E0D5]/60 text-stone-750">
+                                    {dataRows.map((row, rIdx) => (
+                                      <tr key={rIdx} className="hover:bg-white/40 transition-colors">
+                                        {row.map((cell, cIdx) => (
+                                          <td key={cIdx} className="p-3 whitespace-pre-wrap">{cell}</td>
+                                        ))}
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            );
+                          };
+
                           return result.map((sec, idx) => (
-                            <div key={idx} className="bg-white/40 border border-stone-200/50 p-5 rounded-2xl space-y-2 backdrop-blur-2xs shadow-2xs hover:border-[#C5A059]/40 transition-colors duration-300">
-                              <h5 className="text-[10px] font-bold font-mono text-[#B8934C] uppercase tracking-wider border-b border-[#E5E0D5]/50 pb-1.5">{sec.title}</h5>
-                              <p className="text-xs text-stone-750 leading-relaxed whitespace-pre-wrap">{sec.content.join('\n').trim()}</p>
+                            <div key={idx} className="w-full bg-white/60 border border-stone-200/50 p-6 rounded-3xl space-y-4 shadow-xs backdrop-blur-2xs hover:border-[#C5A059]/40 transition-colors duration-300">
+                              <h4 className="text-sm font-serif font-extrabold text-stone-900 border-b border-[#E5E0D5]/60 pb-2 uppercase tracking-wider text-left">{sec.title}</h4>
+                              
+                              <div className="space-y-2">
+                                {sec.elements.map((el, elIdx) => {
+                                  if (el.type === 'table') return renderTable(el.rows);
+                                  if (el.type === 'list-item') return (
+                                    <div key={elIdx} className="flex items-start gap-2 text-xs text-stone-700 my-1.5 pl-2 text-left">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059] mt-1.5 shrink-0" />
+                                      <span className="leading-relaxed">{el.text}</span>
+                                    </div>
+                                  );
+                                  if (el.type === 'subheading') return (
+                                    <h6 key={elIdx} className="text-[11px] font-bold font-mono text-[#B8934C] uppercase tracking-wider mt-4 mb-2 text-left">{el.text}</h6>
+                                  );
+                                  if (el.type === 'definition') return (
+                                    <div key={elIdx} className="my-2 p-3.5 bg-[#FAF8F5]/60 border border-[#E5E0D5]/50 rounded-2xl text-left">
+                                      <span className="font-bold text-stone-850 text-xs block">{el.term}</span>
+                                      <span className="text-xs text-stone-600 leading-relaxed block mt-1">{el.definition}</span>
+                                    </div>
+                                  );
+                                  return (
+                                    <p key={elIdx} className="text-xs text-stone-700 leading-relaxed my-2 text-left whitespace-pre-wrap">{el.text}</p>
+                                  );
+                                })}
+                              </div>
                             </div>
                           ));
                         })()}

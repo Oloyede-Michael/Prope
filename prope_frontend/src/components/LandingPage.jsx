@@ -20,7 +20,7 @@ export default function LandingPage({ navigateTo }) {
   };
 
   return (
-    <div className="min-h-screen text-slate-100 flex flex-col justify-between font-sans relative overflow-x-hidden bg-slate-950">
+    <div className="min-h-screen text-stone-850 flex flex-col justify-between font-sans relative overflow-x-hidden bg-[#FAF8F5]">
       <Navbar 
         onGetStarted={handleGetStarted} 
         onBrowseMarketplace={(show) => setShowMarketplace(show)} 
