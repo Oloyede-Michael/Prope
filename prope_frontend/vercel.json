@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/graphql",
-      "destination": "https://acrewise-9zrp.onrender.com/graphql"
+      "destination": "https://prope-production.up.railway.app/graphql"
     },
     {
       "source": "/api/nim/:path*",
@@ -10,7 +10,7 @@
     },
     {
       "source": "/api/:path*",
-      "destination": "https://acrewise-9zrp.onrender.com/api/:path*"
+      "destination": "https://prope-production.up.railway.app/api/:path*"
     },
     {
       "source": "/(.*)",
