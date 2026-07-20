@@ -123,7 +123,7 @@ export async function createReservedAccount(accountRef, accountName, customerEma
     accountName: accountName,
     currencyCode: 'NGN',
     contractCode: CONTRACT_CODE,
-    customerEmail: customerEmail || `customer_${accountRef}@acrewise.com`,
+    customerEmail: customerEmail || `customer_${accountRef}@prope.com`,
     customerName: customerName || accountName,
     bvn: '21212121212', // Required sandbox BVN
     getAllAvailableBanks: true
@@ -148,7 +148,7 @@ export async function initiateTransfer(amount, reference, narration, destination
   const payload = {
     amount: parseFloat(amount),
     reference: reference,
-    narration: narration || 'AcreWise Payout Release',
+    narration: narration || 'Prope Payout Release',
     destinationBankCode: destinationBankCode,
     destinationAccountNumber: destinationAccountNumber,
     destinationAccountName: destinationAccountName,
@@ -285,7 +285,7 @@ export async function initiateRefund(transactionReference, refundReference, amou
     transactionReference,
     refundReference,
     refundAmount: parseFloat(amount),
-    refundReason: reason || 'AcreWise Escrow Refund',
+    refundReason: reason || 'Prope Escrow Refund',
     customerNote: customerNote || 'Refund',
     ...(destinationAccountNumber ? { destinationAccountNumber, destinationAccountBankCode } : {})
   };

@@ -233,7 +233,7 @@ export default function Onboarding({ onComplete, onCancel }) {
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></div>
-            <span className="font-mono tracking-wider font-bold text-xs text-slate-400">ACREWISE GATEWAY</span>
+            <span className="font-mono tracking-wider font-bold text-xs text-slate-400">PROPE PORTAL</span>
           </div>
           <button onClick={onCancel} className="text-xs text-slate-500 hover:text-slate-350 transition">Cancel</button>
         </div>
@@ -255,7 +255,7 @@ export default function Onboarding({ onComplete, onCancel }) {
         {mode === 'login' && (
           <form onSubmit={handleLoginSubmit} className="space-y-5 text-left">
             <div className="space-y-1">
-              <h2 className="text-lg font-bold text-slate-100">Sign In to AcreWise</h2>
+              <h2 className="text-lg font-bold text-slate-100">Sign In to Prope</h2>
               <p className="text-xs text-slate-400">Enter your registered email to reload your dashboard.</p>
             </div>
             <div className="space-y-1">
@@ -293,7 +293,7 @@ export default function Onboarding({ onComplete, onCancel }) {
           <form onSubmit={handleAccountSetup} className="space-y-5 text-left">
             <div className="space-y-1">
               <h2 className="text-lg font-bold text-slate-100">Verify Identity & Setup Wallet</h2>
-              <p className="text-xs text-slate-400">AcreWise requires KYC verification to provision your personal Monnify wallet account.</p>
+              <p className="text-xs text-slate-400">Prope requires KYC verification to provision your personal Monnify wallet account.</p>
             </div>
             <div className="space-y-1">
               <label className="text-[10px] text-slate-500 font-mono block">YOUR FULL NAME</label>
@@ -527,7 +527,7 @@ export default function Onboarding({ onComplete, onCancel }) {
               onClick={() => onComplete(email)}
               className="w-full py-2.5 bg-indigo-650 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition"
             >
-              Enter Dashboard Console
+              Enter Dashboard
             </button>
           </div>
         )}

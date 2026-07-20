@@ -52,7 +52,7 @@ export const APIS_METADATA = [
       responseMessage: "success",
       responseCode: "0",
       responseBody: {
-        accountName: "ACREWISE MONNIFY WALLET",
+        accountName: "PROPE MONNIFY WALLET",
         accountNumber: "5772529181",
         bankCode: "232"
       }
@@ -115,7 +115,7 @@ export const APIS_METADATA = [
       reference: "payout_ref_30129",
       destinationBankCode: "035",
       destinationAccountNumber: "0068687503",
-      narration: "Acrewise Landlord Settlement Payout"
+      narration: "Prope Landlord Settlement Payout"
     },
     responseBody: {
       requestSuccessful: true,
