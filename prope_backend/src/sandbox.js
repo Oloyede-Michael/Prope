@@ -73,7 +73,7 @@ async function handleSandboxExecution(req, res) {
     // 2. Provision Virtual Account
     if ((url === '/v1/accounts/virtual' || url.startsWith('/v1/accounts/virtual/')) && method === 'POST') {
       const accountRef = body.accountRef || `ref_${Date.now()}`;
-      const accountName = body.accountName || 'AcreWise Virtual Account';
+      const accountName = body.accountName || 'Prope Virtual Account';
       
       const monnifyVa = await createReservedAccount(accountRef, accountName);
       

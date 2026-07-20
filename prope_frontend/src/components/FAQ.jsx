@@ -4,10 +4,10 @@ export default function FAQ() {
   const faqs = [
     {
       q: 'Can I onboard existing tenants?',
-      a: 'Yes. AcreWise allows you to link existing tenants by entering their email profile and assigning them a custom Wema/Sterling bank virtual account reference. Any subsequent transfers they make will immediately trigger reconciliation.'
+      a: 'Yes. Prope allows you to link existing tenants by entering their email profile and assigning them a custom Wema/Sterling bank virtual account reference. Any subsequent transfers they make will immediately trigger reconciliation.'
     },
     {
-      q: 'Does AcreWise manage escrow settlements?',
+      q: 'Does Prope manage escrow settlements?',
       a: 'Absolutely. House purchase funds are held in a secure virtual account. Once the buyer checks the property and authorizes release, the funds are instantly disbursed to the landlord. If rejected, the funds are routed back to the buyer.'
     },
     {
@@ -16,7 +16,7 @@ export default function FAQ() {
     },
     {
       q: 'How do I get started?',
-      a: 'Register an account in the AcreWise Console, select your role (Landlord or Tenant), and begin listing properties or claiming agreements in minutes. All connections leverage our real sandbox API environment.'
+      a: 'Register an account in the Prope Dashboard, select your role (Landlord or Tenant), and begin listing properties or claiming agreements in minutes. All connections leverage our real sandbox API environment.'
     }
   ];
 

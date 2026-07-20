@@ -34,6 +34,10 @@ export const typeDefs = `#graphql
       paymentFrequency: String
       annualProjections: String
       isAssured: Boolean
+      beds: Int
+      baths: Int
+      size: Float
+      built: Int
   }
 
   type Tenancy {
@@ -145,7 +149,7 @@ export const typeDefs = `#graphql
       getSubscription(id: ID!): Subscription
       getUnmatchedQueue: [RentPayment!]!
 
-      # AcreWise Specific Queries
+      # Prope Specific Queries
       getProperties: [Property!]!
       getProperty(id: ID!): Property
       getLandlord(email: String!): Landlord
@@ -168,6 +172,9 @@ export const typeDefs = `#graphql
       # Monnify Config retrieval
       getMonnifyConfig: MonnifyConfig!
 
+      # Tour Appointments
+      getTourAppointments(tenantEmail: String!): [TourAppointment!]!
+
       # Landlord Rent Collection desk
       getLandlordRentPayments(landlordEmail: String!): [RentPayment!]!
   }
@@ -184,7 +191,7 @@ export const typeDefs = `#graphql
       resumeSubscription(id: ID!): Subscription!
       createPlan(input: CreatePlanInput!): Plan!
 
-      # AcreWise Specific Mutations
+      # Prope Specific Mutations
       createLandlord(name: String!, email: String!, phone: String!): Landlord!
       updateLandlordPayoutDetails(email: String!, bankAccountNumber: String!, bankCode: String!, bankAccountName: String): Landlord!
       createProperty(landlordId: ID!, title: String!, type: String!, status: String!): Property!
@@ -204,7 +211,7 @@ export const typeDefs = `#graphql
       upgradeToLandlord(email: String!): UserProfile!
       
       # Property listing extension mutation
-      listProperty(landlordId: ID!, title: String!, type: String!, status: String!, area: String!, buildingType: String!, price: Float!, totalUnits: Int, imageUrl: String, firstPaymentAmount: Float, paymentFrequency: String, annualProjections: String, ownershipDocumentUrl: String): Property!
+      listProperty(landlordId: ID!, title: String!, type: String!, status: String!, area: String!, buildingType: String!, price: Float!, totalUnits: Int, imageUrl: String, firstPaymentAmount: Float, paymentFrequency: String, annualProjections: String, ownershipDocumentUrl: String, beds: Int, baths: Int, size: Float, built: Int): Property!
       decrementPropertyUnits(propertyId: ID!): Property!
       
       # Caretaker mapping
@@ -226,5 +233,18 @@ export const typeDefs = `#graphql
       # Rent Collections Redemption
       redeemRentPayment(paymentId: ID!): RentPayment!
       redeemAllRentPayments(landlordEmail: String!): String!
+      
+      # Tour Appointment Creation
+      createTourAppointment(propertyId: ID!, tenantEmail: String!, tourDate: String!, tourTime: String!): TourAppointment!
+  }
+
+  type TourAppointment {
+      id: ID!
+      property: Property!
+      tenantEmail: String!
+      tourDate: String!
+      tourTime: String!
+      status: String!
+      createdAt: String!
   }
 `;

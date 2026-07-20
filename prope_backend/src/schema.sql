@@ -1,4 +1,4 @@
--- Schema definition for AcreWise/Prope backend
+-- Schema definition for Prope backend
 
 CREATE TABLE IF NOT EXISTS user_profiles (
     id UUID PRIMARY KEY,
@@ -41,6 +41,10 @@ CREATE TABLE IF NOT EXISTS properties (
     annual_projections VARCHAR(512),
     ownership_document_url VARCHAR(1024),
     is_assured BOOLEAN DEFAULT FALSE,
+    beds INTEGER DEFAULT 4,
+    baths INTEGER DEFAULT 4,
+    size NUMERIC(10, 2) DEFAULT 4500,
+    built INTEGER DEFAULT 2023,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -112,5 +116,15 @@ CREATE TABLE IF NOT EXISTS receipts (
     reference VARCHAR(255) UNIQUE NOT NULL,
     details VARCHAR(2000),
     tenant_email VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS tour_appointments (
+    id UUID PRIMARY KEY,
+    property_id UUID NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    tenant_email VARCHAR(255) NOT NULL,
+    tour_date VARCHAR(100) NOT NULL,
+    tour_time VARCHAR(100) NOT NULL,
+    status VARCHAR(50) DEFAULT 'PENDING',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

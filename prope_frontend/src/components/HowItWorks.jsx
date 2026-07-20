@@ -34,7 +34,7 @@ export default function HowItWorks() {
             From onboarding to settlement in three automated steps.
           </h2>
           <p className="text-sm text-slate-400 leading-relaxed">
-            AcreWise abstracts the complexities of transaction lifecycle, banking validations, and ledger adjustments so you can focus on scale.
+            Prope abstracts the complexities of transaction lifecycle, banking validations, and ledger adjustments so you can focus on scale.
           </p>
         </div>
 

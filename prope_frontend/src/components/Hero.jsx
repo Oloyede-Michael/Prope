@@ -22,7 +22,7 @@ export default function Hero({ onGetStarted }) {
               One platform for escrow, rent automation, and landlord finance.
             </h1>
             <p className="text-base md:text-lg text-slate-400 max-w-xl leading-relaxed">
-              AcreWise blends virtual account orchestration, payment reconciliation, and tenant billing into a single unified workspace. Turn payment friction into operational clarity.
+              Prope blends virtual account orchestration, payment reconciliation, and tenant billing into a single unified workspace. Turn payment friction into operational clarity.
             </p>
           </div>
 
@@ -37,7 +37,7 @@ export default function Hero({ onGetStarted }) {
             </button>
             <a 
               href="#how-it-works" 
-              className="inline-flex items-center justify-center px-8 py-4 border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-slate-700 rounded-xl text-sm font-semibold text-slate-350 transition-all duration-300 active:scale-95"
+              className="inline-flex items-center justify-center px-8 py-4 border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-slate-700 rounded-xl text-sm font-semibold text-slate-355 transition-all duration-300 active:scale-95"
             >
               See how it works
             </a>
@@ -70,7 +70,7 @@ export default function Hero({ onGetStarted }) {
           <div className="relative overflow-hidden rounded-2xl border border-slate-800 shadow-2xl shadow-indigo-950/20 bg-slate-900">
             <img 
               src="/dashboard_preview.jpg" 
-              alt="AcreWise dashboard preview" 
+              alt="Prope dashboard preview" 
               className="w-full h-auto object-cover min-h-[300px] select-none pointer-events-none opacity-90" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />

@@ -28,7 +28,7 @@ redis.on('connect', () => {
  * @returns {Promise<boolean>} - True if lock was acquired, false if it already exists.
  */
 export async function acquireLock(lockKey, durationSeconds = 300) {
-  const fullKey = `lock:acrewise:${lockKey}`;
+  const fullKey = `lock:prope:${lockKey}`;
   try {
     const res = await redis.set(fullKey, 'LOCKED', 'EX', durationSeconds, 'NX');
     return res === 'OK';
@@ -44,7 +44,7 @@ export async function acquireLock(lockKey, durationSeconds = 300) {
  * @returns {Promise<void>}
  */
 export async function releaseLock(lockKey) {
-  const fullKey = `lock:acrewise:${lockKey}`;
+  const fullKey = `lock:prope:${lockKey}`;
   try {
     await redis.del(fullKey);
   } catch (err) {

@@ -8,11 +8,11 @@ export default function Footer() {
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 bg-indigo-500 rounded-full"></div>
             <span className="font-mono tracking-wider font-bold text-sm text-slate-350 uppercase">
-              AcreWise
+              Prope
             </span>
           </div>
           <p className="text-[10px] text-slate-500 font-mono">
-            &copy; {new Date().getFullYear()} AcreWise. Built on Supabase, Upstash, and Monnify Sandbox APIs.
+            &copy; {new Date().getFullYear()} Prope. Built on Supabase, Upstash, and Monnify Sandbox APIs.
           </p>
         </div>
 

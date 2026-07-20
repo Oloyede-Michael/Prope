@@ -7,7 +7,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState('landing'); // landing, onboarding, dashboard
   const [loggedInEmail, setLoggedInEmail] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('acrewise_logged_in_email') || '';
+      return localStorage.getItem('prope_logged_in_email') || '';
     }
     return '';
   });
@@ -51,7 +51,7 @@ export default function App() {
   function handleOnboardingComplete(email) {
     setLoggedInEmail(email);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('acrewise_logged_in_email', email);
+      localStorage.setItem('prope_logged_in_email', email);
     }
     navigateTo('dashboard', '/dashboard');
   }
@@ -59,7 +59,7 @@ export default function App() {
   function handleSignOut() {
     setLoggedInEmail('');
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('acrewise_logged_in_email');
+      localStorage.removeItem('prope_logged_in_email');
     }
     navigateTo('landing', '/');
   }

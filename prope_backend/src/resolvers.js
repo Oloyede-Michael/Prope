@@ -157,6 +157,10 @@ const rawResolvers = {
       const res = await query('SELECT * FROM receipts WHERE LOWER(tenant_email) = LOWER($1) ORDER BY created_at DESC', [tenantEmail]);
       return res.rows;
     },
+    getTourAppointments: async (_, { tenantEmail }) => {
+      const res = await query('SELECT * FROM tour_appointments WHERE LOWER(tenant_email) = LOWER($1) ORDER BY created_at DESC', [tenantEmail]);
+      return res.rows;
+    },
     getUserWalletTransactions: async (_, { accountNumber }) => {
       if (accountNumber && accountNumber.startsWith('992')) {
         const localTx = await query('SELECT * FROM mock_wallet_transactions WHERE wallet_account_number = $1 ORDER BY transaction_date DESC', [accountNumber]);
@@ -721,16 +725,24 @@ const rawResolvers = {
       const units = args.totalUnits !== undefined && args.totalUnits !== null ? args.totalUnits : 1;
       const isAssured = args.ownershipDocumentUrl !== undefined && args.ownershipDocumentUrl !== null && args.ownershipDocumentUrl.trim() !== '';
 
+      const beds = args.beds !== undefined && args.beds !== null ? args.beds : 4;
+      const baths = args.baths !== undefined && args.baths !== null ? args.baths : 4;
+      const size = args.size !== undefined && args.size !== null ? args.size : 4500;
+      const built = args.built !== undefined && args.built !== null ? args.built : 2023;
+
       const res = await query(
         `INSERT INTO properties (
           id, landlord_id, title, type, status, verification_status, area, building_type, price, 
           total_units, available_units, image_url, first_payment_amount, payment_frequency, 
-          annual_projections, ownership_document_url, is_assured
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
+          annual_projections, ownership_document_url, is_assured, beds, baths, size, built,
+          caretaker_name, caretaker_email, caretaker_phone
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24) RETURNING *`,
         [
           id, args.landlordId, args.title, args.type, args.status, 'PENDING', args.area, args.buildingType, args.price,
           units, units, args.imageUrl || null, args.firstPaymentAmount || null, args.paymentFrequency,
-          args.annualProjections || null, args.ownershipDocumentUrl || null, isAssured
+          args.annualProjections || null, args.ownershipDocumentUrl || null, isAssured,
+          beds, baths, size, built,
+          'Marcus Sterling', 'm.sterling@prope-luxury.com', '+234 815 555 9010'
         ]
       );
       return res.rows[0];
@@ -776,6 +788,14 @@ const rawResolvers = {
       const res = await query(
         'INSERT INTO receipts (id, title, category, amount, reference, details, tenant_email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
         [id, title, category, amount, reference, details || null, tenantEmail]
+      );
+      return res.rows[0];
+    },
+    createTourAppointment: async (_, { propertyId, tenantEmail, tourDate, tourTime }) => {
+      const id = uuidv4();
+      const res = await query(
+        'INSERT INTO tour_appointments (id, property_id, tenant_email, tour_date, tour_time, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        [id, propertyId, tenantEmail, tourDate, tourTime, 'PENDING']
       );
       return res.rows[0];
     },
@@ -1128,6 +1148,15 @@ export const resolvers = {
   },
 
   EscrowTransaction: {
+    property: async (parent) => {
+      const propertyId = parent.property_id || parent.propertyId;
+      if (!propertyId) return null;
+      const res = await query('SELECT * FROM properties WHERE id = $1', [propertyId]);
+      return clean(res.rows[0]);
+    }
+  },
+
+  TourAppointment: {
     property: async (parent) => {
       const propertyId = parent.property_id || parent.propertyId;
       if (!propertyId) return null;

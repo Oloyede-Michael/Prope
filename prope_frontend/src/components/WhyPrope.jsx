@@ -1,7 +1,7 @@
 import React from 'react';
 import { Layout, Shield, User, BarChart2 } from 'lucide-react';
 
-export default function WhyAcrewise() {
+export default function WhyPrope() {
   const points = [
     {
       icon: Layout,
@@ -26,12 +26,12 @@ export default function WhyAcrewise() {
   ];
 
   return (
-    <section id="why-acrewise" className="py-24 px-6 md:px-16 lg:px-24 bg-slate-950 text-slate-100 relative">
+    <section id="why-prope" className="py-24 px-6 md:px-16 lg:px-24 bg-slate-950 text-slate-100 relative">
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-650/5 rounded-full blur-[120px] pointer-events-none" />
       
       <div className="max-w-7xl mx-auto grid gap-12 lg:grid-cols-[0.9fr_1.1fr] items-center relative z-10">
         <div className="space-y-6 text-left">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-400">Why AcreWise</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-400">Why Prope</p>
           <h2 className="text-3xl md:text-4xl font-extrabold text-slate-100 leading-tight">
             Designed for modern landlords and property operators.
           </h2>
