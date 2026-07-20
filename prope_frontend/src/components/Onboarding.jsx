@@ -221,32 +221,32 @@ export default function Onboarding({ onComplete, onCancel }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-center items-center p-4">
+    <div className="min-h-screen bg-[#FAF8F5] text-stone-800 flex flex-col justify-center items-center p-4">
       {/* Glow Effects */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#C5A059]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#C5A059]/5 rounded-full blur-3xl pointer-events-none" />
 
       {/* Box container */}
-      <div className="w-full max-w-md bg-slate-950/60 border border-slate-800 rounded-3xl p-8 backdrop-blur-md shadow-2xl relative">
+      <div className="w-full max-w-md bg-white/60 border border-[#E5E0D5]/85 rounded-3xl p-8 backdrop-blur-md shadow-md relative">
         
         {/* Brand header */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></div>
-            <span className="font-mono tracking-wider font-bold text-xs text-slate-400">PROPE PORTAL</span>
+            <div className="w-2 h-2 bg-[#C5A059] rounded-full animate-pulse"></div>
+            <span className="font-mono tracking-wider font-bold text-xs text-[#B8934C]">PROPE PORTAL</span>
           </div>
-          <button onClick={onCancel} className="text-xs text-slate-500 hover:text-slate-350 transition">Cancel</button>
+          <button onClick={onCancel} className="text-xs text-stone-500 hover:text-stone-850 transition duration-300 font-bold cursor-pointer">Cancel</button>
         </div>
 
         {error && (
-          <div className="mb-4 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-450 text-xs rounded-xl font-mono text-left">
+          <div className="mb-4 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-800 text-xs rounded-xl font-mono text-left">
             {error}
           </div>
         )}
 
         {loading && (
-          <div className="mb-4 p-3 bg-slate-900 border border-slate-800 text-slate-400 text-xs rounded-xl flex items-center gap-2 text-left">
-            <RefreshCw className="w-4 h-4 animate-spin text-indigo-400" />
+          <div className="mb-4 p-3 bg-[#FAF8F5]/80 border border-[#E5E0D5]/80 text-stone-600 text-xs rounded-xl flex items-center gap-2 text-left">
+            <RefreshCw className="w-4 h-4 animate-spin text-[#C5A059]" />
             Executing Sandbox Monnify operation...
           </div>
         )}
@@ -255,23 +255,23 @@ export default function Onboarding({ onComplete, onCancel }) {
         {mode === 'login' && (
           <form onSubmit={handleLoginSubmit} className="space-y-5 text-left">
             <div className="space-y-1">
-              <h2 className="text-lg font-bold text-slate-100">Sign In to Prope</h2>
-              <p className="text-xs text-slate-400">Enter your registered email to reload your dashboard.</p>
+              <h2 className="text-lg font-bold font-serif text-stone-900">Sign In to Prope</h2>
+              <p className="text-xs text-stone-500">Enter your registered email to reload your dashboard.</p>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] text-slate-500 font-mono block">EMAIL ADDRESS</label>
+              <label className="text-[10px] text-stone-500 font-mono font-bold block">EMAIL ADDRESS</label>
               <input
                 required
                 type="email"
                 placeholder="you@email.com"
                 value={loginEmail}
                 onChange={e => setLoginEmail(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs"
+                className="w-full px-3 py-2.5 bg-white border border-[#E5E0D5] rounded-xl text-xs text-stone-750 focus:border-[#C5A059] focus:outline-none"
               />
             </div>
             <button
               type="submit"
-              className="w-full py-2.5 bg-indigo-650 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-[#C5A059] hover:bg-[#B8934C] text-white text-xs font-bold rounded-xl transition duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
             >
               Sign In
               <ArrowRight className="w-4 h-4" />
@@ -280,7 +280,7 @@ export default function Onboarding({ onComplete, onCancel }) {
               <button
                 type="button"
                 onClick={() => setMode('signup')}
-                className="text-xs text-indigo-400 hover:text-indigo-350 transition"
+                className="text-xs text-[#B8934C] hover:text-[#C5A059] transition duration-300 font-bold cursor-pointer"
               >
                 Don't have an account? Start KYC Verification
               </button>
@@ -292,45 +292,45 @@ export default function Onboarding({ onComplete, onCancel }) {
         {mode === 'signup' && step === 1 && (
           <form onSubmit={handleAccountSetup} className="space-y-5 text-left">
             <div className="space-y-1">
-              <h2 className="text-lg font-bold text-slate-100">Verify Identity & Setup Wallet</h2>
-              <p className="text-xs text-slate-400">Prope requires KYC verification to provision your personal Monnify wallet account.</p>
+              <h2 className="text-lg font-bold font-serif text-stone-900">Verify Identity & Setup Wallet</h2>
+              <p className="text-xs text-stone-500">Prope requires KYC verification to provision your personal Monnify wallet account.</p>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] text-slate-500 font-mono block">YOUR FULL NAME</label>
+              <label className="text-[10px] text-stone-500 font-mono font-bold block">YOUR FULL NAME</label>
               <input
                 required
                 type="text"
                 placeholder="e.g. John Doe"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs"
+                className="w-full px-3 py-2.5 bg-white border border-[#E5E0D5] rounded-xl text-xs text-stone-750 focus:border-[#C5A059] focus:outline-none"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] text-slate-500 font-mono block">EMAIL ADDRESS</label>
+              <label className="text-[10px] text-stone-500 font-mono font-bold block">EMAIL ADDRESS</label>
               <input
                 required
                 type="email"
                 placeholder="you@email.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs"
+                className="w-full px-3 py-2.5 bg-white border border-[#E5E0D5] rounded-xl text-xs text-stone-750 focus:border-[#C5A059] focus:outline-none"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] text-slate-500 font-mono block">ACCOUNT ROLE</label>
+              <label className="text-[10px] text-stone-500 font-mono font-bold block">ACCOUNT ROLE</label>
               <select
                 value={role}
                 onChange={e => setRole(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs"
+                className="w-full px-3 py-2.5 bg-white border border-[#E5E0D5] rounded-xl text-xs text-stone-750 focus:border-[#C5A059] focus:outline-none cursor-pointer"
               >
-                <option value="TENANT">TENANT (Pay Rent/Buy Properties)</option>
-                <option value="LANDLORD">LANDLORD (Receive payouts/Onboard estates)</option>
+                <option value="TENANT">TENANT (Pay Rent / Buy Properties)</option>
+                <option value="LANDLORD">LANDLORD (Receive Payouts / Onboard Listings)</option>
               </select>
             </div>
             <button
               type="submit"
-              className="w-full py-2.5 bg-indigo-650 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-[#C5A059] hover:bg-[#B8934C] text-white text-xs font-bold rounded-xl transition duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
             >
               Continue to Identity Verification
               <ArrowRight className="w-4 h-4" />
@@ -339,7 +339,7 @@ export default function Onboarding({ onComplete, onCancel }) {
               <button
                 type="button"
                 onClick={() => setMode('login')}
-                className="text-xs text-indigo-400 hover:text-indigo-350 transition"
+                className="text-xs text-[#B8934C] hover:text-[#C5A059] transition duration-300 font-bold cursor-pointer"
               >
                 Already have an account? Sign In
               </button>
@@ -351,23 +351,23 @@ export default function Onboarding({ onComplete, onCancel }) {
         {mode === 'signup' && step === 2 && (
           <div className="space-y-5 text-left">
             <div className="space-y-1">
-              <h2 className="text-lg font-bold text-slate-100">Step 2: Complete KYC Verification</h2>
-              <p className="text-xs text-slate-400">Verifying customer credentials directly against Monnify identity APIs.</p>
+              <h2 className="text-lg font-bold font-serif text-stone-900">Step 2: Complete KYC Verification</h2>
+              <p className="text-xs text-stone-500">Verifying customer credentials directly against Monnify identity APIs.</p>
             </div>
 
             {/* Selector */}
-            <div className="flex gap-2 p-1 bg-slate-950 rounded-lg border border-slate-900 text-xs font-mono">
+            <div className="flex gap-2 p-1 bg-stone-50/50 rounded-xl border border-[#E5E0D5] text-xs font-mono">
               <button
                 type="button"
                 onClick={() => setKycMethod('nin')}
-                className={`flex-1 py-1.5 rounded-md transition ${kycMethod === 'nin' ? 'bg-slate-800 text-indigo-400 font-bold' : 'text-slate-500 hover:text-slate-350'}`}
+                className={`flex-1 py-1.5 rounded-lg transition cursor-pointer ${kycMethod === 'nin' ? 'bg-white text-[#B8934C] border border-[#E5E0D5]/60 font-bold shadow-xs' : 'text-stone-500 hover:text-stone-850'}`}
               >
                 NIN Verify (₦60)
               </button>
               <button
                 type="button"
                 onClick={() => setKycMethod('bvn')}
-                className={`flex-1 py-1.5 rounded-md transition ${kycMethod === 'bvn' ? 'bg-slate-800 text-indigo-400 font-bold' : 'text-slate-500 hover:text-slate-350'}`}
+                className={`flex-1 py-1.5 rounded-lg transition cursor-pointer ${kycMethod === 'bvn' ? 'bg-white text-[#B8934C] border border-[#E5E0D5]/60 font-bold shadow-xs' : 'text-stone-500 hover:text-stone-850'}`}
               >
                 BVN Check (₦10)
               </button>
@@ -376,7 +376,7 @@ export default function Onboarding({ onComplete, onCancel }) {
             {kycMethod === 'nin' && (
               <form onSubmit={handleVerifyNIN} className="space-y-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] text-slate-500 font-mono block">NATIONAL IDENTITY NUMBER (NIN)</label>
+                  <label className="text-[10px] text-stone-500 font-mono font-bold block">NATIONAL IDENTITY NUMBER (NIN)</label>
                   <input
                     required
                     type="text"
@@ -384,12 +384,12 @@ export default function Onboarding({ onComplete, onCancel }) {
                     placeholder="11-digit NIN"
                     value={ninInput}
                     onChange={e => setNinInput(e.target.value.replace(/\D/g, ''))}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs"
+                    className="w-full px-3 py-2.5 bg-white border border-[#E5E0D5] rounded-xl text-xs text-stone-750 focus:border-[#C5A059] focus:outline-none"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-2 bg-indigo-650 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition"
+                  className="w-full py-2 bg-[#C5A059] hover:bg-[#B8934C] text-white text-xs font-bold rounded-xl transition duration-300 cursor-pointer shadow-sm"
                 >
                   Verify NIN details
                 </button>
@@ -399,7 +399,7 @@ export default function Onboarding({ onComplete, onCancel }) {
             {kycMethod === 'bvn' && (
               <form onSubmit={handleVerifyBVN} className="space-y-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] text-slate-500 font-mono block">BANK VERIFICATION NUMBER (BVN)</label>
+                  <label className="text-[10px] text-stone-500 font-mono font-bold block">BANK VERIFICATION NUMBER (BVN)</label>
                   <input
                     required
                     type="text"
@@ -407,45 +407,45 @@ export default function Onboarding({ onComplete, onCancel }) {
                     placeholder="11-digit BVN"
                     value={bvnInput}
                     onChange={e => setBvnInput(e.target.value.replace(/\D/g, ''))}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs font-mono"
+                    className="w-full px-3 py-2.5 bg-white border border-[#E5E0D5] rounded-xl text-xs text-stone-750 font-mono focus:border-[#C5A059] focus:outline-none"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] text-slate-500 font-mono block">FULL NAME (MATCH BVN)</label>
+                  <label className="text-[10px] text-stone-500 font-mono font-bold block">FULL NAME (MATCH BVN)</label>
                   <input
                     required
                     type="text"
                     placeholder="e.g. John Doe"
                     value={bvnNameInput}
                     onChange={e => setBvnNameInput(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs"
+                    className="w-full px-3 py-2.5 bg-white border border-[#E5E0D5] rounded-xl text-xs text-stone-750 focus:border-[#C5A059] focus:outline-none"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] text-slate-500 font-mono block">DATE OF BIRTH (DD-MMM-YYYY)</label>
+                  <label className="text-[10px] text-stone-500 font-mono font-bold block">DATE OF BIRTH (DD-MMM-YYYY)</label>
                   <input
                     required
                     type="text"
                     placeholder="e.g. 01-Jan-1990"
                     value={bvnDobInput}
                     onChange={e => setBvnDobInput(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs font-mono"
+                    className="w-full px-3 py-2.5 bg-white border border-[#E5E0D5] rounded-xl text-xs text-stone-750 font-mono focus:border-[#C5A059] focus:outline-none"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] text-slate-500 font-mono block">PHONE NUMBER (MATCH BVN)</label>
+                  <label className="text-[10px] text-stone-500 font-mono font-bold block">PHONE NUMBER (MATCH BVN)</label>
                   <input
                     required
                     type="text"
                     placeholder="e.g. 08012345678"
                     value={bvnPhoneInput}
                     onChange={e => setBvnPhoneInput(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs font-mono"
+                    className="w-full px-3 py-2.5 bg-white border border-[#E5E0D5] rounded-xl text-xs text-stone-750 font-mono focus:border-[#C5A059] focus:outline-none"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-2 bg-indigo-650 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition"
+                  className="w-full py-2 bg-[#C5A059] hover:bg-[#B8934C] text-white text-xs font-bold rounded-xl transition duration-300 cursor-pointer shadow-sm"
                 >
                   Verify BVN Match Details
                 </button>
@@ -458,11 +458,11 @@ export default function Onboarding({ onComplete, onCancel }) {
         {mode === 'signup' && step === 3 && (
           <form onSubmit={handleCreateWallet} className="space-y-5 text-left">
             <div className="space-y-1">
-              <h2 className="text-lg font-bold text-slate-100">Step 3: Provision Monnify Wallet</h2>
-              <p className="text-xs text-slate-400">Identity verified! Generate your personal dedicated Moniepoint bank account.</p>
+              <h2 className="text-lg font-bold font-serif text-stone-900">Step 3: Provision Monnify Wallet</h2>
+              <p className="text-xs text-stone-500">Identity verified! Generate your personal dedicated bank account.</p>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] text-slate-500 font-mono block">CONFIRM BVN</label>
+              <label className="text-[10px] text-stone-500 font-mono font-bold block">CONFIRM BVN</label>
               <input
                 required
                 type="text"
@@ -470,23 +470,23 @@ export default function Onboarding({ onComplete, onCancel }) {
                 placeholder="Confirm your 11-digit BVN"
                 value={walletBvnInput}
                 onChange={e => setWalletBvnInput(e.target.value.replace(/\D/g, ''))}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs font-mono"
+                className="w-full px-3 py-2.5 bg-white border border-[#E5E0D5] rounded-xl text-xs text-stone-750 font-mono focus:border-[#C5A059] focus:outline-none"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] text-slate-500 font-mono block">DATE OF BIRTH (YYYY-MM-DD)</label>
+              <label className="text-[10px] text-stone-500 font-mono font-bold block">DATE OF BIRTH (YYYY-MM-DD)</label>
               <input
                 required
                 type="text"
                 placeholder="e.g. 1990-01-01"
                 value={walletDobInput}
                 onChange={e => setWalletDobInput(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs font-mono"
+                className="w-full px-3 py-2.5 bg-white border border-[#E5E0D5] rounded-xl text-xs text-stone-750 font-mono focus:border-[#C5A059] focus:outline-none"
               />
             </div>
             <button
               type="submit"
-              className="w-full py-2.5 bg-indigo-650 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-[#C5A059] hover:bg-[#B8934C] text-white text-xs font-bold rounded-xl transition duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
             >
               Generate Personal Wallet
               <Landmark className="w-4 h-4" />
@@ -498,34 +498,34 @@ export default function Onboarding({ onComplete, onCancel }) {
         {mode === 'signup' && step === 4 && provisionedAccount && (
           <div className="space-y-6 text-left">
             <div className="text-center space-y-2">
-              <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
-              <h2 className="text-lg font-bold text-slate-100">Wallet Generated successfully!</h2>
-              <p className="text-xs text-slate-400">Your personal sandbox banking details are ready.</p>
+              <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+              <h2 className="text-lg font-bold font-serif text-stone-900">Wallet Generated successfully!</h2>
+              <p className="text-xs text-stone-500">Your personal sandbox banking details are ready.</p>
             </div>
 
             {/* Wallet Account details block */}
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4">
+            <div className="bg-[#FAF8F5] border border-[#E5E0D5]/80 p-5 rounded-2xl space-y-4">
               <div>
-                <span className="text-[9px] font-mono text-slate-500 uppercase">Provider Bank</span>
-                <span className="text-xs font-bold text-slate-200 block">{provisionedAccount.walletBankName || 'Moniepoint Microfinance Bank'}</span>
+                <span className="text-[9px] font-mono text-stone-400 uppercase font-bold">Provider Bank</span>
+                <span className="text-xs font-bold text-stone-800 block">{provisionedAccount.walletBankName || 'Wema Bank'}</span>
               </div>
               <div>
-                <span className="text-[9px] font-mono text-slate-500 uppercase">Dedicated Account Number</span>
-                <span className="text-lg font-mono font-extrabold text-indigo-400 tracking-wider block mt-0.5 select-all">{provisionedAccount.walletAccountNumber}</span>
+                <span className="text-[9px] font-mono text-stone-400 uppercase font-bold">Dedicated Account Number</span>
+                <span className="text-lg font-mono font-extrabold text-[#B8934C] tracking-wider block mt-0.5 select-all">{provisionedAccount.walletAccountNumber}</span>
               </div>
               <div>
-                <span className="text-[9px] font-mono text-slate-500 uppercase">Wallet reference identifier</span>
-                <span className="text-[10px] font-mono text-slate-350 block mt-0.5 select-all truncate">{provisionedAccount.walletReference}</span>
+                <span className="text-[9px] font-mono text-stone-400 uppercase font-bold">Wallet reference identifier</span>
+                <span className="text-[10px] font-mono text-stone-600 block mt-0.5 select-all truncate">{provisionedAccount.walletReference}</span>
               </div>
             </div>
 
-            <div className="p-3.5 bg-indigo-500/5 border border-indigo-500/10 text-slate-400 text-[11px] leading-relaxed rounded-xl">
-              **Funding Wallet:** Fund this wallet by making a simulated test bank transfer to this account number.
+            <div className="p-3.5 bg-[#C5A059]/10 border border-[#C5A059]/25 text-stone-650 text-[11px] leading-relaxed rounded-xl">
+              <strong>Funding Wallet:</strong> Fund this wallet by making a simulated test bank transfer to this account number.
             </div>
 
             <button
               onClick={() => onComplete(email)}
-              className="w-full py-2.5 bg-indigo-650 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition"
+              className="w-full py-2.5 bg-[#C5A059] hover:bg-[#B8934C] text-white text-xs font-bold rounded-xl transition duration-300 cursor-pointer shadow-sm"
             >
               Enter Dashboard
             </button>
