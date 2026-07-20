@@ -12,6 +12,27 @@ import { callNimApi } from '../nim_api';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
+// Helper to parse image URL field (could be JSON array or single URL string)
+function parseImages(urlField) {
+  if (!urlField) return ['/dashboard_preview.jpg'];
+  const trimmed = urlField.trim();
+  try {
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    // fallback
+  }
+  if (trimmed.startsWith('data:')) {
+    return [trimmed];
+  }
+  if (trimmed.includes(',')) {
+    return trimmed.split(',').map(s => s.trim()).filter(Boolean);
+  }
+  return [trimmed];
+}
+
 // Helper to enrich DB properties with high-resolution details from static dataset
 function enrichProperty(dbProp) {
   const luxury = LUXURY_PROPERTIES.find(
@@ -19,13 +40,25 @@ function enrichProperty(dbProp) {
           lp.area.toLowerCase() === dbProp.area?.toLowerCase()
   );
   
+  const dynamicAgent = {
+    name: dbProp.landlord?.name || (luxury && luxury.agent && luxury.agent.name) || "Landlord Partner",
+    role: "Landlord Partner",
+    phone: dbProp.landlord?.phone || (luxury && luxury.agent && luxury.agent.phone) || "",
+    email: dbProp.landlord?.email || (luxury && luxury.agent && luxury.agent.email) || "",
+    avatar: (luxury && luxury.agent && luxury.agent.avatar) || "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=256&h=256&q=80"
+  };
+
   if (luxury) {
     return {
       ...luxury,
       ...dbProp,
-      images: luxury.images,
+      beds: dbProp.beds || luxury.beds || 4,
+      baths: dbProp.baths || luxury.baths || 4,
+      sqft: dbProp.size || luxury.sqft || 4500,
+      yearBuilt: dbProp.built || luxury.yearBuilt || 2023,
+      images: dbProp.imageUrl ? parseImages(dbProp.imageUrl) : luxury.images,
       amenities: luxury.amenities,
-      agent: luxury.agent,
+      agent: dynamicAgent,
       mapCoords: luxury.mapCoords,
       price: parseFloat(dbProp.price || luxury.price),
       firstPaymentAmount: parseFloat(dbProp.firstPaymentAmount || luxury.firstPaymentAmount),
@@ -43,12 +76,7 @@ function enrichProperty(dbProp) {
     sqft: dbProp.size || 4500,
     yearBuilt: dbProp.built || 2023,
     tag: dbProp.type === 'RENT' ? 'Featured Rent' : 'Exclusive Sale',
-    images: [
-      dbProp.imageUrl || '/dashboard_preview.jpg',
-      '/dashboard_preview.jpg',
-      '/dashboard_preview.jpg',
-      '/dashboard_preview.jpg'
-    ],
+    images: parseImages(dbProp.imageUrl),
     mapCoords: { x: 50, y: 50 },
     amenities: {
       interior: ["Smart Automation", "Bespoke Fittings"],
@@ -56,13 +84,7 @@ function enrichProperty(dbProp) {
       building: ["Secure Gated Area", "Parking"],
       eco: ["Solar Microgrid Integration"]
     },
-    agent: {
-      name: dbProp.caretakerName || (dbProp.landlord && dbProp.landlord.name) || "Marcus Sterling",
-      role: dbProp.caretakerName ? "Property Caretaker" : "Managing Partner",
-      phone: dbProp.caretakerPhone || (dbProp.landlord && dbProp.landlord.phone) || "+234 815 555 9010",
-      email: dbProp.caretakerEmail || (dbProp.landlord && dbProp.landlord.email) || "m.sterling@prope-luxury.com",
-      avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=256&h=256&q=80"
-    },
+    agent: dynamicAgent,
     firstPaymentAmount: parseFloat(dbProp.firstPaymentAmount || dbProp.price),
     paymentFrequency: dbProp.paymentFrequency || 'ANNUAL',
     annualProjections: dbProp.annualProjections || 'Stable Rental Yield'
@@ -153,6 +175,8 @@ export default function Dashboard({ userEmail, onSignOut }) {
 
   // Forms States
   const [showPropertyForm, setShowPropertyForm] = useState(false);
+  const [imgSourceMode, setImgSourceMode] = useState('upload'); // 'upload', 'preset'
+  const [uploadedImages, setUploadedImages] = useState([]);
   const [propertyInput, setPropertyInput] = useState({
     title: '', price: '', type: 'RENT', area: '', buildingType: '', imageUrl: '',
     firstPaymentAmount: '', paymentFrequency: 'MONTHLY', annualProjections: '', ownershipDocumentUrl: '',
@@ -618,6 +642,36 @@ export default function Dashboard({ userEmail, onSignOut }) {
     }
   }
 
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (uploadedImages.length + files.length > 5) {
+      triggerNotification("You can upload a maximum of 5 images.", "warning");
+      return;
+    }
+    
+    let loadedCount = 0;
+    const newImages = [...uploadedImages];
+    
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        newImages.push(reader.result);
+        loadedCount++;
+        if (loadedCount === files.length) {
+          setUploadedImages(newImages);
+          setPropertyInput(prev => ({ ...prev, imageUrl: JSON.stringify(newImages) }));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveUploadedImage = (indexToRemove) => {
+    const updated = uploadedImages.filter((_, idx) => idx !== indexToRemove);
+    setUploadedImages(updated);
+    setPropertyInput(prev => ({ ...prev, imageUrl: updated.length > 0 ? JSON.stringify(updated) : '' }));
+  };
+
   // Handle listing property
   async function handleCreateProperty(e) {
     e.preventDefault();
@@ -658,6 +712,7 @@ export default function Dashboard({ userEmail, onSignOut }) {
       `);
       triggerNotification("Property Listed Successfully!", "success");
       setShowPropertyForm(false);
+      setUploadedImages([]);
       setPropertyInput({
         title: '', price: '', type: 'RENT', area: '', buildingType: '', imageUrl: '',
         firstPaymentAmount: '', paymentFrequency: 'MONTHLY', annualProjections: '', ownershipDocumentUrl: '',
@@ -1888,9 +1943,97 @@ export default function Dashboard({ userEmail, onSignOut }) {
                     <label className="text-[10px] text-stone-500 font-mono block">BUILDING TYPE</label>
                     <input required type="text" placeholder="e.g. Duplex Penthouse" value={propertyInput.buildingType} onChange={e => setPropertyInput({...propertyInput, buildingType: e.target.value})} className="w-full px-3 py-2.5 bg-[#FAF8F5]/85 border border-[#E5E0D5] rounded-xl text-xs text-stone-750 placeholder-stone-400 focus:border-[#C5A059] focus:outline-none" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] text-stone-500 font-mono block">IMAGE URL (OPTIONAL)</label>
-                    <input type="text" placeholder="e.g. https://images.unsplash.com/..." value={propertyInput.imageUrl} onChange={e => setPropertyInput({...propertyInput, imageUrl: e.target.value})} className="w-full px-3 py-2.5 bg-[#FAF8F5]/85 border border-[#E5E0D5] rounded-xl text-xs text-stone-750 placeholder-stone-400 focus:border-[#C5A059] focus:outline-none" />
+                  <div className="space-y-3 pt-2 md:col-span-2 text-left">
+                    <label className="text-[10px] text-stone-500 font-mono block uppercase font-bold">Property Image Selection</label>
+                    <div className="flex gap-4 p-1 bg-stone-50/50 rounded-xl border border-[#E5E0D5] text-xs font-mono max-w-xs">
+                      <button
+                        type="button"
+                        onClick={() => setImgSourceMode('upload')}
+                        className={`flex-1 py-1.5 rounded-lg transition cursor-pointer text-center text-[10px] ${
+                          imgSourceMode === 'upload' ? 'bg-white text-[#B8934C] border border-[#E5E0D5]/60 font-bold shadow-xs' : 'text-stone-500 hover:text-stone-850'
+                        }`}
+                      >
+                        Upload Local File
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setImgSourceMode('preset')}
+                        className={`flex-1 py-1.5 rounded-lg transition cursor-pointer text-center text-[10px] ${
+                          imgSourceMode === 'preset' ? 'bg-white text-[#B8934C] border border-[#E5E0D5]/60 font-bold shadow-xs' : 'text-stone-500 hover:text-stone-850'
+                        }`}
+                      >
+                        Select Preset Style
+                      </button>
+                    </div>
+
+                    {imgSourceMode === 'upload' && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-4">
+                          <label className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E5E0D5] hover:border-[#C5A059] rounded-xl text-xs text-stone-700 cursor-pointer shadow-xs font-bold transition">
+                            <span>Choose Photos (1-5)</span>
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              onChange={handleImageUpload} 
+                              className="hidden" 
+                              multiple
+                            />
+                          </label>
+                          {uploadedImages.length > 0 && (
+                            <span className="text-[10px] text-emerald-600 font-mono font-bold">
+                              {uploadedImages.length} photo{uploadedImages.length > 1 ? 's' : ''} loaded!
+                            </span>
+                          )}
+                        </div>
+
+                        {uploadedImages.length > 0 && (
+                          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-2">
+                            {uploadedImages.map((img, idx) => (
+                              <div key={idx} className="relative rounded-xl overflow-hidden h-20 border border-[#E5E0D5] group shadow-xs">
+                                <img src={img} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveUploadedImage(idx)}
+                                  className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-650 hover:bg-red-750 text-white flex items-center justify-center text-[8px] cursor-pointer shadow-sm transition"
+                                >
+                                  ✕
+                                </button>
+                                <span className="absolute bottom-0 inset-x-0 bg-stone-900/60 text-white text-[7px] font-mono text-center block py-0.5 font-bold">
+                                  IMAGE {idx + 1}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {imgSourceMode === 'preset' && (
+                      <div className="space-y-3">
+                        <span className="text-[9px] text-stone-400 block font-mono">Click a preset luxury design style below:</span>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          {[
+                            { name: 'Glass Villa', url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80' },
+                            { name: 'Obsidian House', url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80' },
+                            { name: 'Oceanfront Deck', url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=600&q=80' },
+                            { name: 'Amber Estate', url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80' }
+                          ].map((p, idx) => (
+                            <div 
+                              key={idx} 
+                              onClick={() => setPropertyInput({ ...propertyInput, imageUrl: p.url })}
+                              className={`relative rounded-xl overflow-hidden cursor-pointer h-20 border transition ${
+                                propertyInput.imageUrl === p.url ? 'border-[#C5A059] ring-2 ring-[#C5A059]/20 scale-98 shadow-sm' : 'border-[#E5E0D5] hover:scale-101'
+                              }`}
+                            >
+                              <img src={p.url} alt={p.name} className="w-full h-full object-cover" />
+                              <div className="absolute inset-x-0 bottom-0 bg-stone-900/60 p-1 text-center">
+                                <span className="text-[7px] text-white font-mono block truncate font-bold uppercase">{p.name}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] text-stone-500 font-mono block">FIRST PAYMENT AMOUNT (NGN) (OPTIONAL)</label>
