@@ -687,29 +687,63 @@ export default function Dashboard({ userEmail, onSignOut }) {
       const builtVal = propertyInput.built ? parseInt(propertyInput.built) : 2023;
 
       await callGraphQL(`
-        mutation {
+        mutation ListProperty(
+          $landlordId: ID!,
+          $title: String!,
+          $type: String!,
+          $status: String!,
+          $area: String!,
+          $buildingType: String!,
+          $price: Float!,
+          $imageUrl: String,
+          $firstPaymentAmount: Float,
+          $paymentFrequency: String,
+          $annualProjections: String,
+          $ownershipDocumentUrl: String,
+          $beds: Int,
+          $baths: Int,
+          $size: Float,
+          $built: Int
+        ) {
           listProperty(
-            landlordId: "${landlordProfile.id}",
-            title: "${propertyInput.title}",
-            type: "${propertyInput.type}",
-            status: "LISTED",
-            area: "${propertyInput.area}",
-            buildingType: "${propertyInput.buildingType}",
-            price: ${priceVal},
-            imageUrl: "${imgUrlVal}",
-            firstPaymentAmount: ${firstPayVal},
-            paymentFrequency: "${freqVal}",
-            annualProjections: "${propertyInput.annualProjections || ''}",
-            ownershipDocumentUrl: "${propertyInput.ownershipDocumentUrl || ''}",
-            beds: ${bedsVal},
-            baths: ${bathsVal},
-            size: ${sizeVal},
-            built: ${builtVal}
+            landlordId: $landlordId,
+            title: $title,
+            type: $type,
+            status: $status,
+            area: $area,
+            buildingType: $buildingType,
+            price: $price,
+            imageUrl: $imageUrl,
+            firstPaymentAmount: $firstPaymentAmount,
+            paymentFrequency: $paymentFrequency,
+            annualProjections: $annualProjections,
+            ownershipDocumentUrl: $ownershipDocumentUrl,
+            beds: $beds,
+            baths: $baths,
+            size: $size,
+            built: $built
           ) {
             id
           }
         }
-      `);
+      `, {
+        landlordId: landlordProfile.id,
+        title: propertyInput.title,
+        type: propertyInput.type,
+        status: "LISTED",
+        area: propertyInput.area,
+        buildingType: propertyInput.buildingType,
+        price: priceVal,
+        imageUrl: imgUrlVal,
+        firstPaymentAmount: firstPayVal,
+        paymentFrequency: freqVal,
+        annualProjections: propertyInput.annualProjections || '',
+        ownershipDocumentUrl: propertyInput.ownershipDocumentUrl || '',
+        beds: bedsVal,
+        baths: bathsVal,
+        size: sizeVal,
+        built: builtVal
+      });
       triggerNotification("Property Listed Successfully!", "success");
       setShowPropertyForm(false);
       setUploadedImages([]);
