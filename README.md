@@ -6,7 +6,84 @@ Prope bridges this gap by acting as an automated, cryptographically secure escro
 
 ---
 
+## Quick Start
+
+### 1. Clone the repo
+
+```bash
+git clone <repo-url>
+cd prope
+```
+
+### 2. Backend setup
+
+```bash
+cd prope_backend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+The backend starts at `http://localhost:8080`.
+
+### 3. Frontend setup
+
+Open a new terminal:
+
+```bash
+cd prope_frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+The frontend starts at `http://localhost:5173`.
+
+---
+
+## What you need
+
+Before running the app, you'll need accounts with these services:
+
+| Service | What it's for | Sign up |
+|---------|---------------|---------|
+| **Monnify** | Payment processing (virtual accounts, payouts, webhooks) | [monnify.com](https://monnify.com) |
+| **Supabase** | PostgreSQL database | [supabase.com](https://supabase.com) |
+| **Upstash** | Redis (prevents double-payments) | [upstash.com](https://upstash.com) |
+
+---
+
+## Environment variables
+
+### Backend (`prope_backend/.env`)
+
+| Variable | Description |
+|----------|-------------|
+| `DB_HOST` | Your Supabase database host |
+| `DB_PORT` | Database port (default: `5432`) |
+| `DB_DATABASE` | Database name |
+| `DB_USER` | Database username |
+| `DB_PASS` | Database password |
+| `MONNIFY_API_KEY` | From your Monnify sandbox dashboard |
+| `MONNIFY_SECRET_KEY` | From your Monnify sandbox dashboard |
+| `MONNIFY_CONTRACT_CODE` | From your Monnify sandbox dashboard |
+| `MONNIFY_BASE_URL` | `https://sandbox.monnify.com` (for testing) |
+| `REDIS_URL` | From Upstash dashboard |
+| `PORT` | Backend port (default: `8080`) |
+
+### Frontend (`prope_frontend/.env`)
+
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_BASE_URL` | Backend URL (default: `http://localhost:8080`) |
+| `VITE_NIM_API1` to `VITE_NIM5` | NVIDIA NIM API keys (for AI neighborhood reports) |
+
+Copy the `.env.example` files and fill in your values.
+
+---
+
 ## Table of Contents
+
 1. [System Architecture & Data Flows](#system-architecture--data-flows)
 2. [Database Design & Entity Relationships (ERD)](#database-design--entity-relationships-erd)
 3. [Key Modules & Technical Workflows](#key-modules--technical-workflows)
@@ -351,10 +428,10 @@ Prope prevents this by using **Upstash Redis** to implement a distributed lockin
         Query current balance             "Transaction pending"
         Execute Monnify Transfer          "Please wait..."
         Deduct local DB ledger
-                 │
-                 ▼
-          Release Redis Lock
-         DEL key "lock_payout_981"
+                                 │
+                                 ▼
+           Release Redis Lock
+          DEL key "lock_payout_981"
 ```
 
 ### Lock Implementation Code Example
@@ -401,59 +478,6 @@ The raw response is formatted through our markdown pipeline:
 - Double asterisks (`**bold**`) are compiled into HTML `<strong>` nodes.
 - Rogue bullet stars (`*Header`) are cleaned of their asterisks to show beautiful clean header subtexts.
 - Pipe tables (`| Infrastructure | Status |`) are parsed line-by-line and converted into full-width frosted glass HTML tables.
-
----
-
-## Local Installation & Development Blueprint
-
-### Prerequisites
-- **Node.js** (v18.0.0 or higher)
-- **NPM** or **Yarn**
-- A **Supabase PostgreSQL** instance
-- An **Upstash Redis** URL
-- A **Monnify Sandbox Developer Account** keys
-
-### Backend Setup
-1. Navigate to the backend directory:
-   ```bash
-   cd prope_backend
-   ```
-2. Install the node packages:
-   ```bash
-   npm install
-   ```
-3. Create a `.env` configuration file containing key variables:
-   ```env
-   PORT=8080
-   DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT].supabase.co:5432/postgres
-   REDIS_URL=rediss://default:[TOKEN]@useful-emu-29241.upstash.io:6379
-   MONNIFY_API_KEY=MK_TEST_XXXXXXXXXX
-   MONNIFY_SECRET_KEY=XXXXXXXXXX
-   MONNIFY_CONTRACT_CODE=XXXXXXXXXX
-   ```
-4. Seed the PostgreSQL tables:
-   ```bash
-   npm run seed
-   ```
-5. Launch the backend API process:
-   ```bash
-   npm run dev
-   ```
-
-### Frontend Setup
-1. Navigate to the frontend directory:
-   ```bash
-   cd ../prope_frontend
-   ```
-2. Install package dependencies:
-   ```bash
-   npm install
-   ```
-3. Run the development bundle server:
-   ```bash
-   npm run dev
-   ```
-4. Access the portal UI at `http://localhost:5173`.
 
 ---
 
