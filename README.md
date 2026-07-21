@@ -1,4 +1,4 @@
-# Prope Luxury: Escrow-Backed Real Estate Leasing & Fractional Purchase Engine
+# Prope: Escrow-Powered Real Estate Leasing & Fractional Purchase Engine
 
 Prope is a next-generation real estate trust and financial transaction platform built to solve the systemic trust deficit in African real estate markets. Historically, tenants and buyers in developing markets have faced persistent risks of property listing fraud, double-allocation of rental units, and arbitrary rent hikes. Conversely, landlords suffer from irregular rent collection, lack of visibility into tenant credit history, and complex payment collection channels.
 
