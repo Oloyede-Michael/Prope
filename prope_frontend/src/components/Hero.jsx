@@ -1,7 +1,7 @@
 import React from 'react';
 import { Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
 
-export default function Hero({ onGetStarted }) {
+export default function Hero() {
   return (
     <section className="relative pt-12 pb-24 px-6 md:px-16 lg:px-24 bg-[#FAF8F5] text-stone-800 overflow-hidden">
       {/* Decorative Warm Soft Gradients */}
@@ -28,18 +28,21 @@ export default function Hero({ onGetStarted }) {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
-            <button 
-              onClick={onGetStarted} 
+            <Link
+              to="/auth"
               className="px-8 py-4 bg-[#C5A059] hover:bg-[#B8934C] text-white font-bold text-sm uppercase rounded-xl transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-[#C5A059]/10 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               Get Started
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </Link>
+            
             <a 
-              href="#how-it-works" 
+              href=""
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-8 py-4 border border-[#E5E0D5] bg-white/60 hover:bg-white rounded-xl text-sm font-bold text-stone-650 transition-all duration-300 active:scale-95"
             >
-              See how it works
+              See Demo
             </a>
           </div>
 
