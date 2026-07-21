@@ -158,7 +158,14 @@ const rawResolvers = {
       return res.rows;
     },
     getTourAppointments: async (_, { tenantEmail }) => {
-      const res = await query('SELECT * FROM tour_appointments WHERE LOWER(tenant_email) = LOWER($1) ORDER BY created_at DESC', [tenantEmail]);
+      const res = await query(`
+        SELECT ta.* 
+        FROM tour_appointments ta
+        LEFT JOIN properties p ON ta.property_id = p.id
+        LEFT JOIN landlords l ON p.landlord_id = l.id
+        WHERE LOWER(ta.tenant_email) = LOWER($1) OR LOWER(l.email) = LOWER($1)
+        ORDER BY ta.created_at DESC
+      `, [tenantEmail]);
       return res.rows;
     },
     getUserWalletTransactions: async (_, { accountNumber }) => {
