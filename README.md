@@ -455,13 +455,4 @@ The raw response is formatted through our markdown pipeline:
    ```
 4. Access the portal UI at `http://localhost:5173`.
 
----
 
-## Glossary of System Terms & Financial Paradigms
-
-- **Escrow Ledger:** A financial lockbox holding rental transactions securely in state until terms (like tenancy verification or monthly lease durations) are validated.
-- **Dynamic Virtual Account:** A temporary bank routing number generated on-the-fly for funding transactions which routes payments automatically via gateway webhooks to our balance ledger.
-- **Distributed Locking:** A concurrency lock pattern preventing server nodes from writing to a single row balance simultaneously, mitigating double-spending.
-- **Redeemable Balance:** The portion of escrowed funds that the landlord has legally cleared to withdraw once contract agreements are confirmed.
-- **Sandbox Simulation:** A mock environment running on test APIs that behaves identically to live transactions without moving actual capital.
-- **Base64 Serialized Data URL:** A binary-to-text encoding format that transforms locally uploaded files into text characters, allowing raw storage directly within database text columns.

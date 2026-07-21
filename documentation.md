@@ -881,30 +881,4 @@ getTourAppointments: async (_, { tenantEmail }) => {
    ```
 4. Access the web interface at `http://localhost:5173`.
 
----
 
-## 12. Troubleshooting, Diagnostics & Glossary
-
-### 12.1 Common Diagnostic Resolutions
-
-#### Issue: `Error: listen EADDRINUSE: address already in use :::8080`
-- **Cause:** Another background Node process is already bound to port `8080`.
-- **Resolution:** Terminate running node processes via PowerShell:
-  ```powershell
-  Stop-Process -Name node -Force
-  ```
-
-#### Issue: `Failed to list property: Syntax Error: Unexpected character: "/"`
-- **Cause:** Inserting Base64 image strings directly into GraphQL query strings via template literals (`imageUrl: "${str}"`).
-- **Resolution:** Pass values using the GraphQL variables dictionary (`callGraphQL(query, variables)`).
-
-#### Issue: `net::ERR_INVALID_URL` or `431 Request Header Fields Too Large`
-- **Cause:** Base64 Data URL headers (`data:image/jpeg;base64,`) being split on internal commas.
-- **Resolution:** Check `if (trimmed.startsWith('data:'))` inside `parseImages` before running string splitting logic.
-
-### 12.2 System Terms Glossary
-- **Escrow Ledger:** A financial holding ledger that locks rental funds until occupancy terms are verified.
-- **Virtual Account:** A dedicated bank account number provisioned dynamically per user for wallet top-ups.
-- **Distributed Locking:** A concurrency pattern preventing double-spending or duplicate API calls.
-- **NIM AI Completer:** NVIDIA's cloud inference microservice used for generating neighborhood intelligence reports.
-- **Redeemable Balance:** Escrowed funds verified and unlocked for withdrawal by the property landlord.
