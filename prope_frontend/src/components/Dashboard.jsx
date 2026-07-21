@@ -148,6 +148,7 @@ export default function Dashboard({ userEmail, onSignOut }) {
   const [selectedTourDate, setSelectedTourDate] = useState('Mon, Jul 20');
   const [selectedTourTime, setSelectedTourTime] = useState('10:00 AM');
   const [tourScheduled, setTourScheduled] = useState(false);
+  const [bookedTours, setBookedTours] = useState([]);
   const [copiedId, setCopiedId] = useState(null);
 
   // Refs for scrolling property cards
@@ -578,6 +579,38 @@ export default function Dashboard({ userEmail, onSignOut }) {
         setLandlordRentPayments(rentPaymentsData.getLandlordRentPayments || []);
       }
 
+      // 8. Fetch booked tour appointments
+      try {
+        const toursData = await callGraphQL(`
+          query GetTours($email: String!) {
+            getTourAppointments(tenantEmail: $email) {
+              id
+              tenantEmail
+              tourDate
+              tourTime
+              status
+              createdAt
+              property {
+                id
+                title
+                area
+                buildingType
+                price
+                imageUrl
+                landlord {
+                  name
+                  email
+                  phone
+                }
+              }
+            }
+          }
+        `, { email: currentProfile.email });
+        setBookedTours((toursData && toursData.getTourAppointments) || []);
+      } catch (tourErr) {
+        console.warn('Failed to load tours:', tourErr);
+      }
+
     } catch (err) {
       console.error(err);
       setError(err.message || 'Error sync data');
@@ -760,22 +793,32 @@ export default function Dashboard({ userEmail, onSignOut }) {
 
   // Handle scheduling private showing tour
   async function handleScheduleTour() {
-    if (!selectedProperty || !currentProfile) return;
+    const email = userProfile?.email || userEmail;
+    if (!selectedProperty || !email) {
+      triggerNotification("Please sign in or select a valid property.", "warning");
+      return;
+    }
     try {
       await callGraphQL(`
-        mutation {
+        mutation CreateTourAppointment($propertyId: ID!, $tenantEmail: String!, $tourDate: String!, $tourTime: String!) {
           createTourAppointment(
-            propertyId: "${selectedProperty.id}",
-            tenantEmail: "${currentProfile.email}",
-            tourDate: "${selectedTourDate}",
-            tourTime: "${selectedTourTime}"
+            propertyId: $propertyId,
+            tenantEmail: $tenantEmail,
+            tourDate: $tourDate,
+            tourTime: $tourTime
           ) {
             id
           }
         }
-      `);
+      `, {
+        propertyId: selectedProperty.id,
+        tenantEmail: email,
+        tourDate: selectedTourDate || 'Mon, Jul 20',
+        tourTime: selectedTourTime || '10:00 AM'
+      });
       setTourScheduled(true);
       triggerNotification("Showing Appointment Scheduled Successfully!", "success");
+      fetchProfileAndData();
     } catch (err) {
       console.error(err);
       triggerNotification("Failed to schedule tour: " + err.message, "error");
@@ -1348,6 +1391,7 @@ export default function Dashboard({ userEmail, onSignOut }) {
                   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
                   { id: 'properties', label: 'Properties Hub', icon: Building2 },
                   { id: 'leases', label: 'Leases Vault', icon: Users },
+                  { id: 'tours', label: 'Private Tours & Viewings', icon: Calendar },
                   ...(userProfile && userProfile.role === 'LANDLORD' ? [{ id: 'rent-desk', label: 'Collect Rent Payments', icon: Sparkles }] : []),
                   { id: 'escrow', label: 'Purchase Escrows', icon: Coins },
                   { id: 'receipts', label: 'Receipts Locker', icon: Receipt },
@@ -2674,6 +2718,100 @@ export default function Dashboard({ userEmail, onSignOut }) {
                               {formatPrice(t.balance)}
                             </span>
                           </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB: PRIVATE TOURS & VIEWINGS */}
+          {activeTab === 'tours' && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
+                <div className="space-y-1">
+                  <h2 className="text-xl font-bold text-stone-850 font-serif">Booked Private Tours & Showing Appointments</h2>
+                  <p className="text-xs text-stone-500">Track and manage all scheduled physical property viewings registered across Monnify calendars.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => { setActiveTab('properties'); }} 
+                    className="px-4 py-2 bg-[#C5A059] hover:bg-[#B8934C] text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition shadow-xs cursor-pointer"
+                  >
+                    <Building2 className="w-4 h-4" />
+                    Book New Showing
+                  </button>
+                </div>
+              </div>
+
+              {bookedTours.length === 0 ? (
+                <div className="p-12 text-center rounded-3xl bg-white/60 backdrop-blur border border-[#E5E0D5]/80 space-y-4 shadow-sm">
+                  <Calendar className="w-12 h-12 mx-auto text-[#C5A059]/60" />
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-stone-800 font-serif uppercase tracking-wider">No Scheduled Showing Tours Found</h3>
+                    <p className="text-xs text-stone-500 max-w-sm mx-auto">Explore available luxury residences in the marketplace to reserve a physical showing appointment with our land managers.</p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('properties')}
+                    className="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl transition cursor-pointer"
+                  >
+                    Browse Luxury Marketplace
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {bookedTours.map(t => {
+                    const prop = t.property || {};
+                    const agentName = prop.landlord?.name || 'Managing Partner';
+                    const agentPhone = prop.landlord?.phone || '+234 815 555 9010';
+                    const agentEmail = prop.landlord?.email || 'm.sterling@prope-luxury.com';
+                    const images = parseImages(prop.imageUrl);
+
+                    return (
+                      <div key={t.id} className="p-5 rounded-2xl bg-white/70 backdrop-blur border border-[#E5E0D5]/80 shadow-sm space-y-4 text-left hover:border-[#C5A059]/40 transition">
+                        <div className="flex items-start gap-4">
+                          <div className="w-24 h-20 rounded-xl overflow-hidden shrink-0 border border-[#E5E0D5]">
+                            <img src={images[0]} alt={prop.title || 'Property'} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="space-y-1 flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[9px] font-mono font-bold text-[#B8934C] uppercase tracking-wider bg-[#C5A059]/10 px-2 py-0.5 rounded-md">
+                                {prop.buildingType || 'Luxury Residence'}
+                              </span>
+                              <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full uppercase">
+                                {t.status || 'CONFIRMED'}
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-bold text-stone-850 truncate font-serif">{prop.title || 'Luxury Estate Showing'}</h4>
+                            <p className="text-xs text-stone-500 truncate">{prop.area || 'Lagos, Nigeria'}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#E5E0D5]/60 text-xs font-mono">
+                          <div className="bg-[#FAF8F5] p-2.5 rounded-xl border border-[#E5E0D5]/40 space-y-0.5">
+                            <span className="text-[8px] text-stone-400 uppercase block font-mono">Showing Date</span>
+                            <span className="font-bold text-stone-800 block text-xs">{t.tourDate}</span>
+                          </div>
+                          <div className="bg-[#FAF8F5] p-2.5 rounded-xl border border-[#E5E0D5]/40 space-y-0.5">
+                            <span className="text-[8px] text-stone-400 uppercase block font-mono">Appointment Time</span>
+                            <span className="font-bold text-stone-800 block text-xs">{t.tourTime}</span>
+                          </div>
+                        </div>
+
+                        <div className="p-3 bg-stone-50/80 rounded-xl border border-[#E5E0D5]/50 flex items-center justify-between gap-2 text-xs">
+                          <div className="space-y-0.5">
+                            <span className="text-[8px] font-mono text-stone-400 uppercase block">Host Manager</span>
+                            <span className="font-bold text-stone-800 block">{agentName}</span>
+                            <span className="text-[10px] font-mono text-stone-500 block">{agentPhone}</span>
+                          </div>
+                          <a 
+                            href={`mailto:${agentEmail}?subject=Inquiry regarding showing on ${t.tourDate}`}
+                            className="px-3 py-1.5 bg-white border border-[#E5E0D5] hover:border-[#C5A059] text-stone-700 hover:text-[#B8934C] text-[10px] font-bold rounded-lg transition"
+                          >
+                            Contact Host
+                          </a>
                         </div>
                       </div>
                     );
