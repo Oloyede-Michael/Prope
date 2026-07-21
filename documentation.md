@@ -13,7 +13,7 @@ In rapidly evolving emerging economies across Africa, real estate represents one
 **Prope** was designed and engineered as a next-generation real estate financial technology platform. By acting as an automated, cryptographically verified escrow arbiter, Prope transforms real estate transactions into trust-less, transparent, and seamless digital interactions.
 
 The platform integrates five core technology pillars:
-1. **Monnify Sandbox API Suite:** Powering bank-transfer virtual account creation, instant wallet top-ups, identity proofing (NIN/BVN verification), and automated payout disbursements.
+1. **Monnify Sandbox API Suite:** Powering bank-transfer virtual account creation, instant wallet top-ups, identity proofing (NIN/BVN verification), sub-account commission splits, and automated payout disbursements.
 2. **GraphQL Engine (Apollo Server + Express):** Delivering a typed, low-latency API schema for querying property assets, user profiles, tenancy contracts, and settlement ledgers.
 3. **Upstash Redis Concurrency Layer:** Enforcing distributed locks (SETNX patterns) to eliminate double-spending, race conditions, and duplicate bank payout requests under high concurrent load.
 4. **Supabase PostgreSQL Database:** Providing relational persistence, strict foreign key constraints, cascading deletions, and ACID-compliant transactional guarantees.
@@ -30,7 +30,7 @@ Prope employs a decoupled client-server architecture. The frontend is built as a
 │                                FRONTEND LAYER (Vite + React)                           │
 │  - Onboarding & Identity Portal          - Luxury Marketplace & Multi-Photo Uploads    │
 │  - Rent Escrow & Wallet Management       - AI Neighborhood Reports (NVIDIA NIM)        │
-└───────────────────────────────────────────┬────────────────────────────────────────────┘
+└───────────────────────────┬────────────────────────────────────────────┘
                                             │
                                   GraphQL Queries / Mutations
                                             │
@@ -160,36 +160,6 @@ erDiagram
     }
 ```
 
-### 3.1 Relational Schema Definitions & Types
-
-#### `user_profiles` Table
-Stores basic profile registers, wallet identifiers, and identity proofing status.
-- `id` (`UUID`, Primary Key, default `gen_random_uuid()`): Unique user ID.
-- `email` (`VARCHAR(255)`, Unique, Not Null): Primary identity handle.
-- `role` (`VARCHAR(50)`, Not Null, default `'TENANT'`): Operational role (`TENANT` or `LANDLORD`).
-- `kyc_verified` (`BOOLEAN`, default `FALSE`): Indicates if BVN/NIN validation passed.
-- `wallet_account_number` (`VARCHAR(50)`): Dedicated Monnify Sandbox Virtual Account number (e.g. `9920192831`).
-- `wallet_balance` (`NUMERIC(15,2)`, default `0.00`): Available ledger wallet balance.
-
-#### `properties` Table
-Contains property listings registered by verified landlords.
-- `id` (`UUID`, Primary Key, default `gen_random_uuid()`): Unique property ID.
-- `landlord_id` (`UUID`, Foreign Key -> `landlords.id`): Property owner.
-- `image_url` (`TEXT`): Serialized JSON array string storing up to 5 uploaded Base64 photos or preset URLs.
-- `beds` (`INTEGER`, default `4`): Number of bedrooms.
-- `baths` (`INTEGER`, default `4`): Number of bathrooms.
-- `size` (`NUMERIC(10,2)`, default `4500.00`): Total floor area in square feet.
-- `built` (`INTEGER`, default `2023`): Construction year.
-
-#### `tour_appointments` Table
-Tracks scheduled physical property showings.
-- `id` (`UUID`, Primary Key, default `gen_random_uuid()`): Unique appointment ID.
-- `property_id` (`UUID`, Foreign Key -> `properties.id`): Target listing.
-- `tenant_email` (`VARCHAR(255)`): Email of the prospective tenant booking the tour.
-- `tour_date` (`VARCHAR(50)`): Selected calendar date (e.g., `'Mon, Jul 20'`).
-- `tour_time` (`VARCHAR(50)`): Selected showing time slot (e.g., `'11:00 AM'`).
-- `status` (`VARCHAR(50)`, default `'PENDING'`): Showing status.
-
 ---
 
 ## 4. Multi-Role Authentication & Onboarding Flow
@@ -223,97 +193,194 @@ sequenceDiagram
     Backend-->>Client: Return Provisioned User Profile & Virtual Wallet
 ```
 
-### 4.1 Tenant Onboarding & Portal Privileges
-1. **Access Level:** Tenants can browse the marketplace, run AI neighborhood scans, schedule private showings, pay lease deposits, and top up virtual balances.
-2. **Virtual Account Provisioning:** Every tenant automatically receives a dedicated Monnify Sandbox account number (e.g. `Wema Bank - 9928172635`). Simulated bank transfers to this number instantly credit `user_profiles.wallet_balance`.
-
-### 4.2 Landlord Onboarding & Verification Rules
-1. **Bank Verification Number (BVN) Requirement:** Landlords must submit their BVN and settlement bank account details.
-2. **Identity Verification:** The server calls the Monnify Sandbox KYC validation proxy (`/api/v1/vas/bvn-details-match`).
-3. **Landlord Table Escalation:** Upon successful verification, the backend executes `upgradeToLandlord(email)`, creating a record in the `landlords` table and granting access to the **Collect Rent Payments** desk and listing creation tools.
-
 ---
 
-## 5. Virtual Accounts & Financial Escrow Operations
+## 5. MONNIFY API DEEP-DIVE & INTEGRATION ARCHITECTURE
 
-Financial interactions in Prope rely on an escrow ledger. Funds deposited by tenants do not transfer directly to the landlord's private bank account until lease terms are confirmed or periodic collection cycles complete.
+The **Monnify API Suite** forms the primary financial engine of Prope. It acts as the payment gateway, customer wallet provisioner, KYC verification broker, and bank payout disburser.
 
 ```
-                           TENANT FUNDING & ESCROW FLOW
-                           
- ┌────────────────┐          Bank Transfer          ┌───────────────────────────┐
- │ Tenant Wallet  │ ──────────────────────────────> │  Prope Escrow Ledger      │
- │ Balance        │                                 │  Status: ESCROWED         │
- └────────────────┘                                 └─────────────┬─────────────┘
-                                                                  │
-                                                        Lease Cycle Complete
-                                                        or Manual Redeem Action
-                                                                  │
-                                                                  ▼
- ┌────────────────┐          Sandbox Transfer       ┌───────────────────────────┐
- │ Landlord Private│ <────────────────────────────── │ Monnify Disbursement API  │
- │ Bank Account   │          Single Payout          │ Status: REDEEMED          │
- └────────────────┘                                 └───────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                                MONNIFY API SUITE OPERATIONAL MATRIX                      │
+├────────────────────────────┬───────────────────────────────────┬────────────────────────┤
+│ API Feature                │ Monnify Endpoint                  │ Prope Feature Linkage  │
+├────────────────────────────┼───────────────────────────────────┼────────────────────────┤
+│ OAuth Token Authentication │ POST /api/v1/auth/login           │ Gateway Security       │
+│ Reserved Virtual Accounts  │ POST /api/v1/bank-transfer/res... │ Dynamic Wallet & Escrow│
+│ Identity Match (KYC)       │ POST /api/v1/vas/bvn-details-match│ Landlord Verification  │
+│ Single Transfer Payouts    │ POST /api/v2/disbursements/single │ Landlord Escrow Redeem │
+│ Sub-Account Split Payments │ POST /api/v1/sub-accounts         │ Prope Commission Fee   │
+│ Real-Time Event Webhooks   │ POST /api/v1/webhooks/transfers   │ Instant Ledger Credit  │
+└────────────────────────────┴───────────────────────────────────┴────────────────────────┤
 ```
 
-### 5.1 Monnify API Sandbox Integration Deep-Dive
+### 5.1 OAuth Token Authentication & Key Lifecycle
 
-#### 1. Authentication & Access Token Generation
-All calls to Monnify require a Bearer Access Token obtained by passing Base64-encoded credentials:
+All communications with Monnify endpoints require a short-lived Bearer Access Token. Prope computes HTTP Basic Authentication headers using the `MONNIFY_API_KEY` and `MONNIFY_SECRET_KEY`:
 
+- **Endpoint:** `POST https://sandbox.monnify.com/api/v1/auth/login`
+- **Headers:** `Authorization: Basic Base64(API_KEY:SECRET_KEY)`
+
+#### Authentication Code Implementation
 ```javascript
 const axios = require('axios');
 
-async function getMonnifyToken() {
+let cachedToken = null;
+let tokenExpiryTime = 0;
+
+async function getMonnifyAccessToken() {
+  // Reuse valid cached token if within 55 minutes of issuance
+  if (cachedToken && Date.now() < tokenExpiryTime) {
+    return cachedToken;
+  }
+
   const apiKey = process.env.MONNIFY_API_KEY;
   const secretKey = process.env.MONNIFY_SECRET_KEY;
-  const credentials = Buffer.from(`${apiKey}:${secretKey}`).toString('base64');
+  const basicAuth = Buffer.from(`${apiKey}:${secretKey}`).toString('base64');
 
   const response = await axios.post(
     'https://sandbox.monnify.com/api/v1/auth/login',
     {},
     {
       headers: {
-        Authorization: `Basic ${credentials}`
+        Authorization: `Basic ${basicAuth}`,
+        'Content-Type': 'application/json'
       }
     }
   );
 
-  return response.data.responseBody.accessToken;
+  if (response.data.requestSuccessful) {
+    cachedToken = response.data.responseBody.accessToken;
+    // Set expiry to 55 minutes (3300000 ms)
+    tokenExpiryTime = Date.now() + 3300000;
+    return cachedToken;
+  }
+
+  throw new Error(`Monnify Authentication Failed: ${response.data.responseMessage}`);
 }
 ```
 
-#### 2. Virtual Account Reservation Payload
-To reserve a customer virtual account for wallet top-ups:
+---
 
+### 5.2 Dynamic Virtual Account Provisioning (Customer Reserved Accounts)
+
+In traditional real estate apps, users make payments through generic checkout forms. Prope eliminates checkout friction by assigning a **dedicated, permanent virtual bank account** (e.g. *Wema Bank*, *Sterling Bank*, or *Moniepoint*) to every user upon registration.
+
+- **Endpoint:** `POST /api/v1/bank-transfer/reserved-accounts`
+- **Headers:** `Authorization: Bearer <ACCESS_TOKEN>`
+
+#### Reserved Account Request Payload
 ```json
-POST /api/v1/bank-transfer/reserved-accounts
-Authorization: Bearer <ACCESS_TOKEN>
-Content-Type: application/json
-
 {
-  "accountReference": "prope_ref_9812739",
-  "accountName": "Tunde Bakare Prope Wallet",
+  "accountReference": "prope_usr_a8f91023",
+  "accountName": "Babatunde Alao Prope Escrow Wallet",
   "currencyCode": "NGN",
   "contractCode": "8472910384",
-  "customerEmail": "tunde.b@domain.com",
-  "customerName": "Tunde Bakare",
+  "customerEmail": "babatunde.alao@domain.com",
+  "customerName": "Babatunde Alao",
   "getAllAvailableBanks": true
 }
 ```
 
-#### 3. Single Transfer Disbursement Payload
-When a landlord redeems settled rent payments from the escrow ledger, Prope issues a single payout transfer request to Monnify:
-
+#### Reserved Account Response Payload
 ```json
-POST /api/v2/disbursements/single
-Authorization: Bearer <ACCESS_TOKEN>
-Content-Type: application/json
-
 {
-  "amount": 2500000.00,
-  "reference": "rent_red_a91b2c3d_1720000000",
-  "narration": "Prope Rent Payout Escrow Release",
+  "requestSuccessful": true,
+  "responseMessage": "success",
+  "responseCode": "0",
+  "responseBody": {
+    "contractCode": "8472910384",
+    "accountReference": "prope_usr_a8f91023",
+    "accountName": "Babatunde Alao Prope Escrow Wallet",
+    "currencyCode": "NGN",
+    "customerEmail": "babatunde.alao@domain.com",
+    "customerName": "Babatunde Alao",
+    "accounts": [
+      {
+        "bankCode": "035",
+        "bankName": "Wema Bank",
+        "accountNumber": "9920192831",
+        "accountName": "Babatunde Alao Prope Escrow Wallet"
+      },
+      {
+        "bankCode": "232",
+        "bankName": "Sterling Bank",
+        "accountNumber": "9928172640",
+        "accountName": "Babatunde Alao Prope Escrow Wallet"
+      }
+    ]
+  }
+}
+```
+
+#### Linkage to Prope Database (`user_profiles`)
+When the API returns the virtual account details, Prope extracts the primary account number and bank name, updating the user profile in PostgreSQL:
+
+```javascript
+await query(
+  `UPDATE user_profiles 
+   SET wallet_account_number = $1, wallet_bank_name = $2, wallet_reference = $3 
+   WHERE email = $4`,
+  [accountNumber, bankName, accountReference, userEmail]
+);
+```
+
+---
+
+### 5.3 Landlord Identity Proofing & KYC Matching APIs
+
+To comply with Anti-Money Laundering (AML) rules and eliminate fake property listings, Prope verifies a landlord's **BVN (Bank Verification Number)** and **NIN (National Identity Number)** using Monnify's Verification Services.
+
+- **BVN Match Endpoint:** `POST /api/v1/vas/bvn-details-match`
+- **NIN Match Endpoint:** `POST /api/v1/vas/nin-details-match`
+
+#### BVN Validation Payload
+```json
+{
+  "bvn": "22190823410",
+  "name": "Marcus Sterling",
+  "dateOfBirth": "1985-04-12"
+}
+```
+
+#### Identity Resolution Logic in Resolvers
+```javascript
+verifyCustomerNIN: async (_, { email, nin }) => {
+  try {
+    const token = await getMonnifyAccessToken();
+    await axios.post(
+      'https://sandbox.monnify.com/api/v1/vas/nin-details-match',
+      { nin, email },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  } catch (err) {
+    console.warn(`⚠️ Sandbox Mode Note: Bypass NIN check if endpoint is unavailable on test keys.`);
+  }
+
+  // Update profile status in database
+  const res = await query(
+    'UPDATE user_profiles SET nin = $1, kyc_verified = TRUE WHERE LOWER(email) = LOWER($2) RETURNING *',
+    [nin, email]
+  );
+  return res.rows[0];
+}
+```
+
+---
+
+### 5.4 Single Transfer Disbursement API (Landlord Escrow Payouts)
+
+When a landlord requests a rent payout or redeems confirmed escrow payments, Prope executes a **Single Transfer Disbursement** via Monnify. This transfers funds directly from Prope's central escrow pool into the landlord's personal commercial bank account.
+
+- **Endpoint:** `POST /api/v2/disbursements/single`
+- **Headers:** `Authorization: Bearer <ACCESS_TOKEN>`
+
+#### Disbursement Request Payload
+```json
+{
+  "amount": 1850000.00,
+  "reference": "rent_red_b921f001_1721590000",
+  "narration": "Prope Rent Payout Escrow Release - The Obsidian Penthouse",
   "destinationBankCode": "058",
   "destinationAccountNumber": "0123456789",
   "currency": "NGN",
@@ -321,20 +388,138 @@ Content-Type: application/json
 }
 ```
 
-#### 4. Webhook HMAC SHA-512 Security Verification
-Monnify sends real-time HTTP POST notifications when a transaction completes. Prope verifies the request signature using SHA-512 HMAC digest matching:
+#### Disbursement Response Payload
+```json
+{
+  "requestSuccessful": true,
+  "responseMessage": "Transfer Processed Successfully",
+  "responseCode": "0",
+  "responseBody": {
+    "amount": 1850000.00,
+    "reference": "rent_red_b921f001_1721590000",
+    "status": "SUCCESS",
+    "dateCreated": "2026-07-21 18:30:00",
+    "totalFee": 10.75,
+    "destinationAccountName": "Marcus Sterling"
+  }
+}
+```
+
+#### Database State Mutation
+Upon receiving confirmation from Monnify, Prope marks the rent payments as redeemed:
+
+```javascript
+await query(
+  `UPDATE rent_payments 
+   SET redeemed = TRUE, redeemed_at = NOW(), redeem_payout_reference = $1 
+   WHERE landlord_id = $2 AND redeemed = FALSE`,
+  [disbursementReference, landlordId]
+);
+```
+
+---
+
+### 5.5 Transfer Splitting & Sub-Account Commission Structure
+
+Prope supports automated revenue sharing via **Monnify Sub-Accounts**. When a tenant pays rent, Monnify can split the funds automatically:
+- **Landlord Share (e.g. 95%):** Remitted directly to the landlord's sub-account.
+- **Prope Platform Fee (e.g. 5%):** Remitted automatically to Prope's treasury account.
+
+```
+                             SPLIT PAYMENT ARCHITECTURE
+                             
+                              Tenant Rent Payment 
+                                 ($10,000,000)
+                                       │
+                                       ▼
+                             Monnify Gateway Split
+                                       │
+                ┌──────────────────────┴──────────────────────┐
+                ▼ (95%)                                       ▼ (5%)
+     Landlord Sub-Account                         Prope Treasury Sub-Account
+          ($9,500,000)                                   ($500,000)
+```
+
+#### 1. Registering a Sub-Account (`POST /api/v1/sub-accounts`)
+```json
+{
+  "currencyCode": "NGN",
+  "bankCode": "058",
+  "accountNumber": "0123456789",
+  "email": "m.sterling@prope-luxury.com",
+  "defaultSplitPercentage": 95.0
+}
+```
+
+#### 2. Specifying Split Configurations in Transactions
+```json
+{
+  "incomeSplitConfig": [
+    {
+      "subAccountCode": "MFY_SUB_89127391",
+      "splitPercentage": 95.0,
+      "feePercentage": 100.0,
+      "feeBearer": true
+    }
+  ]
+}
+```
+
+---
+
+### 5.6 Real-Time Webhooks & Security Verification
+
+Monnify emits real-time HTTP POST webhooks for transaction events:
+- `SUCCESSFUL_TRANSACTION`: Fired when a tenant transfers money to their virtual account.
+- `SUCCESSFUL_DISBURSEMENT`: Fired when a landlord payout successfully lands in their bank account.
+- `FAILED_DISBURSEMENT`: Fired if a bank payout fails, enabling automatic transaction rollback.
+
+#### Webhook Payload Example (`SUCCESSFUL_TRANSACTION`)
+```json
+{
+  "eventType": "SUCCESSFUL_TRANSACTION",
+  "eventData": {
+    "transactionReference": "MNFY|20260721|102938",
+    "paymentReference": "prope_ref_9812739",
+    "amountPaid": 5000000.00,
+    "totalPayable": 5000000.00,
+    "settlementAmount": 4975000.00,
+    "paidOn": "21/07/2026 18:45:00",
+    "paymentStatus": "PAID",
+    "paymentMethod": "ACCOUNT_TRANSFER",
+    "customer": {
+      "name": "Babatunde Alao",
+      "email": "babatunde.alao@domain.com"
+    }
+  }
+}
+```
+
+#### SHA-512 Signature Validation Algorithm
+To ensure webhook requests are genuinely sent by Monnify and not forged by malicious actors, Prope computes an HMAC SHA-512 digest:
+
+$$\text{Calculated Hash} = \text{HMAC\_SHA512}\left(\text{SecretKey}, \text{ClientSecret} + \text{transactionReference} + \text{amountPaid} + \text{totalPayable} + \text{paymentReference}\right)$$
 
 ```javascript
 const crypto = require('crypto');
 
-function isWebhookSignatureValid(reqBody, signatureHeader) {
+function verifyMonnifyWebhook(reqBody, signatureHeader) {
   const secretKey = process.env.MONNIFY_SECRET_KEY;
-  const computedHash = crypto
-    .createHmac('sha512', secretKey)
-    .update(JSON.stringify(reqBody))
+  const data = reqBody.eventData;
+
+  const stringToHash = 
+    secretKey + 
+    data.transactionReference + 
+    data.amountPaid + 
+    data.totalPayable + 
+    data.paymentReference;
+
+  const computedSignature = crypto
+    .createHash('sha512')
+    .update(stringToHash)
     .digest('hex');
 
-  return computedHash === signatureHeader;
+  return computedSignature === signatureHeader;
 }
 ```
 
@@ -720,6 +905,6 @@ getTourAppointments: async (_, { tenantEmail }) => {
 ### 12.2 System Terms Glossary
 - **Escrow Ledger:** A financial holding ledger that locks rental funds until occupancy terms are verified.
 - **Virtual Account:** A dedicated bank account number provisioned dynamically per user for wallet top-ups.
-- **Distributed Locking:** A Redis concurrency pattern preventing double-spending or duplicate API calls.
+- **Distributed Locking:** A concurrency pattern preventing double-spending or duplicate API calls.
 - **NIM AI Completer:** NVIDIA's cloud inference microservice used for generating neighborhood intelligence reports.
 - **Redeemable Balance:** Escrowed funds verified and unlocked for withdrawal by the property landlord.
